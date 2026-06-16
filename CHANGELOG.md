@@ -7,6 +7,30 @@ Per-module history. Each module is versioned independently with its own git tags
 
 ## F0 — Agent Behavioral Standards
 
+### [1.3.0] — 2026-06-16
+
+Added **Process Gate 6: New or Already Held** — guards against the agent
+presenting as a fresh discovery something the provided context already holds
+(silent rediscovery). Orthogonal to Gate 2: Gate 2 marks a claim's *origin*
+(sourced/inferred/generated); Gate 6 marks whether it is *new relative to what
+is already in hand*. The gate arms only when novelty or authorship is being
+claimed and stays silent during faithful compilation/extraction — so it fires
+for synthesis work without mis-firing on dossier/report/import skills where
+restating context is the task.
+
+Minor bump: additive gate, no change to the existing five. Origin: the failure
+mode was surfaced by Glen's Gap Analysis Method; convergent with S0's existing
+"Earn Every Claim" gate (same evidence-or-cut shape applied to hype rather than
+false-novelty).
+
+Gates at this version:
+1. Source Before Statement
+2. Mark the Move
+3. Reframe Before Committing
+4. Second-Order Check
+5. Generalization Check
+6. New or Already Held
+
 ### [1.2.0] — 2026-04-19 — baseline
 
 Initial import into `makegood-guardrails`, establishing the source of truth.
