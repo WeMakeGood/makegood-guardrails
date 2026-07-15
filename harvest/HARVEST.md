@@ -14,11 +14,11 @@ single model) when an operator flags a suspected new pattern in production.
 
 ## H0 — Preconditions
 
-- [ ] Baseline corpus assembled, frozen, and split (`baseline/README.md` ledger populated). **First harvest only:** assemble it first — the counting stage has no denominators without it.
-- [ ] `baseline/metrics-baseline.json` exists (first harvest: computed in H3 from the calibration split).
+- [ ] Identification pass run (`baseline/panel.md` populated; `baseline/metrics-baseline.json` carries per-genre envelopes). **First harvest only:** run it first — the counting stage has no denominators without it. Panel rules in `baseline/README.md`.
+- [ ] Positive and negative controls exist in `baseline/constructions/` and the counters behave correctly on both (fire on negative, silent on positive).
 - [ ] Target model list confirmed = the models Make Good libraries currently deploy on.
-- [ ] Judge model chosen — a **different generation** than any generator; record it now.
-- [ ] Create `reports/<YYYY-MM>-<models>/` with `outputs/`, `judgments/` subdirectories.
+- [ ] Judge model AND foil-generator model chosen — each a **different generation** than any harvest target; record both now.
+- [ ] Create `reports/<YYYY-MM>-<models>/` with `outputs/`, `judgments/`, `foils/` subdirectories.
 
 ## H1 — Compose the battery
 
@@ -39,23 +39,24 @@ Per model × per arm × per prompt, **fresh context every prompt**:
 
 ## H3 — Count (statistical detector)
 
-- [ ] **First harvest only:** compute per-metric human densities from the baseline's *calibration split* → write `baseline/metrics-baseline.json`, and replace HARVEST_PLAN.md Component 4's provisional thresholds with calibrated ones.
 - [ ] Measure every Component-4 metric per output (agent-assisted counting until `measure_density.py` ships). Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`.
-- [ ] Flag candidates per the rule: metric over threshold in ≥ 60% of arm-B outputs for a model.
-- [ ] Run the metrics against `baseline/negative-controls/` — every metric must fire there. A metric that doesn't is broken; fix it before trusting its arm-B numbers.
+- [ ] Compute **envelope deviation** per (model, arm): each metric's distance from the panel's per-genre human envelope (`baseline/metrics-baseline.json`). This is the harvest's headline number.
+- [ ] Flag candidates per the rule: metric outside the envelope in ≥ 60% of arm-B outputs for a model.
+- [ ] Control check both directions: every metric must **fire** on `baseline/constructions/negative/` and stay **silent** on `baseline/constructions/positive/`. A metric failing either is broken or mis-thresholded; fix before trusting its arm-B numbers.
 
 ## H4 — Judge (blind cross-model detector)
 
-- [ ] Pair each arm-B output with a genre- and length-matched human sample from the baseline's **held-out split**. Randomize A/B order; strip provenance.
+- [ ] **Generate foils:** for each arm-B output, a genre- and length-matched synthetic foil from the foil-generator model (different generation than the target), constrained to the panel envelope. Run the counters on each foil; discard and regenerate any that land outside the envelope. Save to `reports/<id>/foils/`.
+- [ ] Pair each arm-B output with its foil. Randomize A/B order; strip provenance.
 - [ ] Judge model, fresh context per pair, this prompt:
 
-> One of these two passages was written by a person, one by an AI model.
-> 1) Which is the model's, A or B? 2) Confidence (low/medium/high). 3) List
-> the specific features that gave it away — quote the exact phrases or
-> describe the exact constructions. 4) List any features that made the
-> *other* passage feel human.
+> One of these two passages shows the writing patterns of an unconstrained AI
+> model; the other does not. 1) Which shows them, A or B? 2) Confidence
+> (low/medium/high). 3) List the specific features that gave it away — quote
+> the exact phrases or describe the exact constructions. 4) List any features
+> that made the *other* passage read as disciplined human-style prose.
 
-- [ ] Save transcripts to `judgments/`. Compute: **detectability rate** (the harvest's headline number), **gate effectiveness** (arm B vs. arm A detectability), and the **giveaway tally** (a giveaway mentioned across ≥ 3 pairs is a candidate).
+- [ ] Save transcripts to `judgments/`. Compute: the **giveaway tally** (the judge's primary product — a giveaway mentioned across ≥ 3 pairs is a candidate; review each for whether it points at the target or at the foil generator), **foil-discrimination rate** (secondary trend line), and **gate effectiveness** (arm B vs. arm A, on both envelope deviation and discrimination). The harvest's headline number is H3's envelope deviation, not a judge output.
 
 ## H5 — External signal
 

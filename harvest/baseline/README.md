@@ -1,104 +1,77 @@
-# Baseline Corpus — Provenance Ledger
+# Reference Layer — Identification Panel & Synthetic Constructions
 
-**Status: NOT YET ASSEMBLED.** The first harvest cannot run its counting stage
-until this corpus is assembled, frozen, and calibrated. This README is the
-assembly specification and, once assembled, the permanent provenance record.
+**Status: IDENTIFICATION PASS NOT YET RUN.** The first harvest cannot run its
+counting stage until the panel is measured and `metrics-baseline.json` exists.
 
-## What this corpus is
+Two artifacts live here, with a strict one-way relationship:
 
-The frozen human-writing baseline that defines *human density* for every
-metric in HARVEST_PLAN.md Component 4. All backstop thresholds are ratios
-against it.
+```
+real published writing  ──measure──▶  human envelopes  ──constrain/validate──▶  synthetic constructions
+     (never stored)                (metrics-baseline.json)                    (the only stored passages)
+```
 
-Two things this corpus must never be (HARVEST_PLAN.md, "Baseline corpus
-protocol" — both rejected designs):
+**Constructions never set thresholds.** Thresholds derive only from the
+measured panel. A synthetic passage that disagrees with the numbers is wrong
+by definition and is regenerated. (HARVEST_PLAN.md, "Reference architecture.")
 
-1. **Model-authored.** A model-written baseline carries the measured
-   generation's own densities and collapses the deltas to zero.
-2. **Make Good's own writing.** S0 is a *normalizer* — a generic practitioner
-   floor; voice specificity is the voice profiles' job (S0 2.0.1 precedence).
-   Calibrating on the org's or founders' writing would define "human density"
-   as one house style's density and blind the detector wherever that style
-   runs hot. The baseline is normed on the population of excellent
-   professional writers, not on one speaker.
+---
 
-## Assembly protocol (hybrid — settled 2026-07-15, revised same day)
+## 1. The identification panel (measure, never store)
 
-- **The model does:** specification, sourcing, screening, structure-preserving
-  anonymization, normalization, dedupe, calibration computation, and this
-  ledger. It authors nothing that enters the corpus.
-- **Humans authored — generic and excellent.** Published pre-2023 professional
-  writing from many authors and organizations, selected genre-by-genre.
-  Candidate pools: celebrated appeal-letter archives (e.g. SOFII's showcase),
-  exemplary organizational copy cited in the copywriting and nonprofit-
-  communications literature, well-edited annual-report and foundation-letter
-  prose, strongly edited pre-2023 editorial/op-ed writing, newspaper
-  profile/obit bios. Sector-shaped genres (appeals, grant narratives) use
-  excellent examples from *other* organizations; generic genres draw across
-  sectors deliberately. Sources are proposed by the model and vetoed/extended
-  by the operator. <!-- TODO: collect Chris's suggested sources (writers, orgs, editors he trusts) into the pool before assembly. -->
-- **Screening criteria (all required per sample):**
-  1. Verifiable pre-2023 publication (contamination guard — human writing is
-     increasingly model-inflected).
-  2. Human-authorship confidence.
-  3. Genre fit to the battery.
-  4. **Quality screen:** the sample would itself pass S0's gates (earned
-     claims, point-first, medium's shape). Baseline on average professional
-     writing and you calibrate the floor to the failure.
-- **Diversity cap:** no author or organization contributes more than ~2
-  samples — the guard against one famous voice becoming "human normal."
-- **Frozen once assembled** — the corpus never grows.
+Real, editorially excellent, verifiably pre-2023 published writing, measured
+**in situ at natural length**. Every metric is length-normalized
+(per-1,000-words and per-sentence rates), so an essay is measured at its
+full natural length and a bio at its natural 90 words — no excerpting, no
+fixed word-count bands, no anonymization, no stored text. Only derived
+statistics and citations are retained.
 
-## Anonymization (structure-preserving)
+**Why not a stored sample corpus** (rejected designs, HARVEST_PLAN.md):
+fixed-length excerpts distort the density profiles being measured; any
+hand-curated human set is too small to test against; the org's own archives
+would calibrate the normalizer to one house style; and freely synthesized
+"human" text carries the measuring generation's own densities.
 
-Proper nouns are swapped 1:1 with fictional equivalents of the same shape —
-organization → fictional organization, person → fictional person, place →
-fictional place. **Nothing else is edited.** Genericizing a name to "the
-organization" would distort the noun-repetition and rhythm metrics this
-corpus exists to calibrate. Anonymization also removes a judge shortcut
-(recognizing a real org's copy as human) and keeps an internal corpus of
-third-party text low-sensitivity. The corpus file holds the anonymized text;
-the ledger below holds the true source — auditability survives.
+### Panel rules
 
-## Target composition
+- **Sources:** published pre-2023 professional writing, genre-matched to the
+  battery — celebrated appeal letters (e.g. SOFII's showcase), exemplary
+  organizational copy, well-edited annual-report/foundation-letter prose,
+  strongly edited editorial and feature writing, newspaper profile bios.
+  Model proposes; operator vetoes/extends.
+  <!-- TODO: collect Chris's suggested sources (writers, orgs, editors he trusts) before the first pass. -->
+- **Screening (all required per text):** verifiable pre-2023 publication;
+  human-authorship confidence; genre fit; editorial excellence (the text
+  would pass S0's gates — earned claims, point-first, medium's shape).
+- **Diversity cap:** no author or organization contributes more than ~2 texts.
+- **Scale:** 15–25 texts per battery genre, ~150–250 total. Measuring is
+  cheap; curation was the bottleneck, and there is none.
+- **Outputs:**
+  - `panel.md` — one row per text: citation, publication date, genre,
+    natural length, per-metric stats, archive link where available.
+  - `metrics-baseline.json` — per-genre, per-metric human envelopes
+    (median + spread). This file is what thresholds ratio against.
+- **Versioning:** an identification pass is a versioned event (recorded in
+  `panel.md` and the harvest report's provenance block). Re-running with new
+  texts or new metrics produces a new version — never a silent drift.
 
-4–6 samples per battery genre, ~400–700 words each (~40–70 samples total):
+## 2. Synthetic constructions (`constructions/`)
 
-| Battery genre | Target samples | Assembled |
-|---|---|---|
-| About / program / web pages (F01, F08) | 6 | 0 |
-| Case study / impact narrative (F02, R07) | 5 | 0 |
-| Appeal / donor letters (F03) | 5 | 0 |
-| Newsletter articles (F04) | 5 | 0 |
-| Editorial / blog / op-ed (F05, R02) | 5 | 0 |
-| Analytical / board / comparison prose (F06) | 4 | 0 |
-| Report prose / exec summaries (F07) | 5 | 0 |
-| Social / short promo (F09, R06, R08) | 5 | 0 |
-| Bios (F10) | 4 | 0 |
-| FAQ / Q&A prose (F11) | 4 | 0 |
-| Correspondence (F12) | 5 | 0 |
+Every stored passage in the reference layer is synthetic — constructed to
+highlight elements identified in real samples without being a sample — and
+**counter-validated against the envelope before use**.
 
-## Splits
+| Directory | Built to be | Counters must | Role |
+|---|---|---|---|
+| `positive/` | Inside the human envelope | **NOT fire** | Specificity unit tests — a metric that fires here is mis-thresholded |
+| `negative/` | Deliberately tic-maximal | **Fire** | Sensitivity unit tests — a metric that stays silent here is broken |
+| `foils/` | Inside the envelope; genre- and length-matched to each battery output | Not fire | Judge pairing material (Component 5) |
 
-- **Calibration split (~60%):** used once to compute `metrics-baseline.json`
-  (the per-metric human densities that thresholds ratio against).
-- **Held-out split (~40%):** reserved for judge pairing (Component 5). Never
-  used for calibration; never shown during threshold work.
+**Foil rules:** generated by a **different model generation** than the
+harvest's target model; validated by the counters; out-of-envelope foils are
+discarded and regenerated. Foils are per-harvest artifacts — store them under
+the harvest's report directory if preferred, or here with a harvest-id prefix.
 
-Split assignment is per-sample, recorded in the ledger below, and frozen.
-
-## Negative controls (`negative-controls/`)
-
-Model-generated, deliberately tic-maximal samples — detector *sensitivity*
-unit tests. If a metric doesn't fire on these, the metric is broken. They are
-never part of the baseline, never used for calibration, and never paired in
-judging. This is the only sanctioned model-authored content in `baseline/`.
-
-## Provenance ledger
-
-One row per sample, added at assembly time. True source stays here; the
-corpus file carries the anonymized text.
-
-| ID | Genre | True source (publication/org) | Pub. date | Words | Anonymization map ref | Split | Screened by | Notes |
-|---|---|---|---|---|---|---|---|---|
-| *(none yet)* | | | | | | | | |
+**Known residual:** a foil's unmeasured dimensions carry its generator's
+signature. Judge giveaways are reviewed with this in mind; a giveaway that
+points at the foil rather than the target is itself useful — it becomes a
+candidate metric for the next identification pass.

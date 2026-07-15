@@ -21,7 +21,7 @@ The fix is to stop authoring the list and start **measuring** it: generate outpu
 - **Thresholds, not bans.** Most tics are legitimate techniques at human density — em-dashes and the rule of three are classical rhetoric. The machine signature is *overuse*. Backstop entries encode density thresholds relative to a human baseline, never absolute prohibitions.
 - **Evidence earns a slot.** A pattern enters the backstop only when flagged by at least two of the three detectors (statistical, judge, external). A pattern with no observed leakage across two consecutive harvests is retired. The list can shrink.
 - **The battery is frozen; the models change.** A fixed prompt core makes harvests comparable across model generations — the longitudinal signal is the point. A small rotating minority guards against overfitting the gates to the battery.
-- **The baseline is frozen too.** Human writing is increasingly model-inflected. The human baseline corpus is a fixed, pre-2023-weighted sample set that does not grow with new writing.
+- **The reference numbers come from pre-2023 human writing.** Human writing is increasingly model-inflected, so the identification panel measures only verifiably pre-2023 published texts. The panel is measure-and-cite (no text stored); re-deriving the envelope is a versioned event, never a silent drift.
 - **Distribution rides the existing lock pipeline.** The backstop is an independently versioned artifact in this repo, pinned via `guardrails.lock`, vendored by `--resolve-guardrails`. Libraries adopt updates by deliberate bump, exactly like F0/S0 today. No runtime lookup, ever — always-load content is in the system prompt from turn one, per the delivery principle in the skill's ARCHITECTURE.md.
 - **Human review is non-negotiable.** The harvest proposes; a human disposes. A fully automated list would let one anomalous run ban ordinary English.
 
@@ -117,9 +117,13 @@ makegood-guardrails/
       core.md                               (F01–F12, frozen)
       rotating.md                           (R-pool; 4 selected per harvest)
     baseline/
-      README.md                             (corpus provenance ledger; frozen)
-      metrics-baseline.json                 (calibrated densities, written once)
-      negative-controls/                    (synthetic tic-maximal samples — detector unit tests, never baseline)
+      README.md                             (identification-panel spec + rules)
+      panel.md                              (provenance list: citation, genre, natural length, stats — text never stored)
+      metrics-baseline.json                 (per-genre human envelopes; re-derived per versioned identification pass)
+      constructions/                        (synthetic, envelope-validated test artifacts — never threshold sources)
+        positive/                           (inside envelope — counters must NOT fire)
+        negative/                           (tic-maximal — counters MUST fire)
+        foils/                              (judge foils: cross-generation, envelope-validated)
     scripts/
       measure_density.py                    (Phase 2 — spec in Component 4)
     reports/
@@ -131,22 +135,27 @@ makegood-guardrails/
         REPORT.md                           (the operator-facing report)
 ```
 
-### Baseline corpus protocol (settled 2026-07-15; revised same day)
+### Reference architecture: identification panel + synthetic constructions (settled 2026-07-15, third revision)
 
-**Hybrid: model-spec'd and model-screened, human-authored — by generic excellent writers, not by Make Good.** Two rejected designs, both for the same class of reason:
+The reference layer has two jobs that were originally conflated into one "baseline corpus" artifact. Three designs were rejected on the way here:
 
-- A model-*synthesized* baseline: the baseline defines human density for the constructions the model overuses, so a model-authored baseline carries the measured generation's own densities and collapses the deltas toward zero (and would duplicate arm A while wearing a "human" label).
-- A **Make Good–archives baseline** (the original draft): S0 is a *normalizer* — a generic practitioner floor, with voice specificity delegated to loaded voice profiles (S0 2.0.1 precedence: the profile is the voice, S0 is the floor). Calibrating thresholds on the founders' or the org's own writing would define "human density" as one house style's density, blinding the detector wherever that style runs hot. A normalizer is normed on the population, not on one speaker.
+1. A freely model-*synthesized* baseline — the baseline defines human density for the constructions the model overuses; a model freely authoring it carries the measured generation's own densities and collapses the deltas toward zero.
+2. A **Make Good–archives baseline** — S0 is a *normalizer* (generic practitioner floor; voice specificity is the voice profiles' job per S0 2.0.1 precedence). Calibrating on one house style defines "human density" as one speaker's density.
+3. A **curated fixed-length human-sample corpus** — fixed word-count bands ignore genre length reality (an excellent feature at its natural length can't be excerpted to 400–700 words without distorting the very density profile being measured), and any hand-curated human set is too small and too sparse to test against.
 
-The protocol:
+The replacement splits the two jobs:
 
-- **The model does:** corpus specification (genre stratification matched to the battery, length bands, register), sourcing and screening, structure-preserving anonymization, normalization/dedupe, calibration computation, and the provenance ledger in `baseline/README.md`. Nothing model-authored enters the baseline.
-- **Humans authored — generic and excellent:** published pre-2023 professional writing from many authors and organizations, selected genre-by-genre (celebrated appeal letters, exemplary organizational copy, well-edited annual-report and editorial prose, etc.). Sector-shaped genres (appeals, grant narratives) use excellent examples from other organizations; generic genres draw across sectors deliberately. Internal measurement use only; never redistributed.
-- **Quality screen:** a candidate sample enters only if it would itself pass S0's gates (earned claims, point-first, medium's shape). Not circular — the gates screen claims and structure; the thresholds then measure the density envelope of gate-passing prose, a different axis. Baseline on average professional writing and you calibrate the floor to the failure.
-- **Diversity cap:** no author or organization contributes more than ~2 samples — the guard against celebrity-stylist bias (one famous voice becoming "human normal").
-- **Anonymization is structure-preserving:** proper nouns swapped 1:1 with fictional equivalents of the same shape (org→org, person→person, place→place); nothing else edited — genericizing a name to "the organization" would distort the noun-repetition and rhythm metrics being measured. Anonymized text lives in the corpus; true source and date live in the ledger, so auditability survives.
-- **Synthesis gets the negative-control job:** deliberately tic-maximal model-generated samples live in `baseline/negative-controls/` as detector *sensitivity* unit tests — if a metric doesn't fire on them, the metric is broken. They are never part of the baseline and never used for calibration.
-- Target size: 4–6 samples per battery genre at ~400–700 words (~40–70 samples). Assembled and frozen before the first harvest; a held-out split is reserved for judge pairing (Component 5).
+**Job 1 — the numbers: an identification panel (measure, never store).** Real, editorially excellent, verifiably pre-2023 published writing is measured **in situ at its natural length** — every Component-4 metric is length-normalized (per-1,000-words, per-sentence rates), so natural length is not a problem, it's the point. Only derived statistics and citations are retained; no text is stored, excerpted, or anonymized (which also removes the copyright-storage and anonymization-distortion questions entirely). Because it's measure-and-cite rather than curate-and-store, N scales cheaply: target 15–25 texts per battery genre (~150–250 total), many authors and organizations, diversity cap ~2 texts per author/org, editorial-quality screen. Output: `baseline/metrics-baseline.json` — per-genre, per-metric **human envelopes** (median + spread) — plus `baseline/panel.md`, the provenance list. Re-running the identification pass (new texts, new metrics) is a versioned event.
+
+**Job 2 — the text artifacts: synthetic constructions built to the identified spec.** Wherever an actual passage is needed, it is synthetic — constructed to *highlight elements identified in real samples* without being a sample — and **validated by the counters against the envelope before use**. Three roles, in `baseline/constructions/`:
+
+- **Positive controls** (`positive/`) — built inside the human envelope; the counters must NOT fire on them. Specificity tests.
+- **Negative controls** (`negative/`) — deliberately tic-maximal; the counters MUST fire. Sensitivity tests.
+- **Judge foils** (`foils/`) — genre- and length-matched to each battery output, generated by a **different model generation** than the harvest target, constrained to the envelope, counter-validated (out-of-envelope foils are discarded and regenerated). These replace human samples in Component 5's pairing.
+
+**The one-way flow is the invariant:** measured reality → envelope → synthetic artifacts validated against it. **Constructions never set thresholds.** Thresholds derive only from the panel; a synthetic passage that disagrees with the numbers is wrong by definition and regenerated. This is what keeps the rejected design #1 rejected while still making every stored artifact synthetic.
+
+**Judge-metric consequence:** with foils instead of human samples, "detectability vs. humans" is no longer the headline. The harvest headline becomes **envelope deviation** (per-metric distance of arm-B outputs from the human envelope — counting-based and more robust). The judge contributes the **giveaway tally** (its real product) and a secondary foil-discrimination rate. Known residual: a foil's *unmeasured* dimensions carry its generator's signature, so some giveaways may point at the foil generation rather than the target — mitigated by the cross-generation rule and by human review of the tally; anything real it surfaces becomes a candidate metric for the next identification pass.
 
 ---
 
@@ -196,7 +205,7 @@ Event invitation; op-ed opening; grant-narrative excerpt; volunteer recruitment 
 
 ## Component 4 — Statistical detection (the counting layer)
 
-Measured per output, aggregated per (model, arm). Immune to model self-blindness because it is arithmetic. All thresholds below are **provisional defaults — the first run calibrates them against the frozen baseline** (TODO: replace after calibration).
+Measured per output, aggregated per (model, arm). Immune to model self-blindness because it is arithmetic. All thresholds below are **provisional defaults — the first identification pass replaces them with per-genre envelopes measured from the panel** (TODO: replace after the first pass).
 
 | Metric | Definition | Flag when (provisional) |
 |---|---|---|
@@ -221,7 +230,7 @@ Measured per output, aggregated per (model, arm). Immune to model self-blindness
 
 Catches pattern-level tics the counters don't have a regex for.
 
-- **Pairing.** Each arm-B output is paired with a genre- and length-matched human sample from a **held-out split** of the baseline corpus (never the calibration split).
+- **Pairing.** Each arm-B output is paired with a genre- and length-matched **synthetic foil** from `baseline/constructions/foils/` — envelope-constrained, generated by a different model generation than the harvest target, counter-validated before use. (See "Reference architecture" above; human samples are measured for the envelope, never stored as pairing material.)
 - **Judge.** A model from a *different generation* than the generator, fresh context, no S0 loaded. Cross-generation judging partially defeats shared blindness; the statistical layer covers the rest. (TODO: pick the judge model per harvest; record it in the report.)
 - **Presentation.** Randomized A/B order, no provenance metadata.
 - **Judge prompt (template):**
@@ -286,7 +295,8 @@ be tuned to this generation, with before/after examples.]
 
 ## Provenance
 [Models + versions tested, judge model, battery composition (core + which
-rotating prompts), baseline corpus hash, who reviewed.]
+rotating prompts), identification-pass version + panel hash, foil generator
+model, who reviewed.]
 ```
 
 The "What to listen for in review" section is deliberately reusable: it is the seed for LeadersPath material and thought-leadership content, per the open-methodology positioning — publication is a separate editorial decision made per report, not automatic.
@@ -321,7 +331,8 @@ A recurring agentic run (scheduled agent or skill invocation) that executes batt
 
 | Risk | Mitigation |
 |---|---|
-| Baseline contamination (humans writing like models) | Baseline frozen, pre-2023-weighted, provenance recorded; never grows |
+| Baseline contamination (humans writing like models) | Panel texts verifiably pre-2023, provenance recorded; envelope re-derivation is a versioned event |
+| Synthetic constructions drifting into threshold authority | One-way flow invariant: thresholds derive only from the measured panel; constructions are counter-validated artifacts, regenerated when they disagree with the numbers |
 | Battery overfit (gates/backstop tuned to the bait) | Frozen core for comparability + rotating minority for coverage; genres, not phrasings, are what the battery fixes |
 | Banlist growth outlawing ordinary English | 25-entry/~700-token cap; threshold phrasing; evidence admission rule; retirement rule; human review |
 | Judge shares generator's blindness | Cross-generation judging + the statistical layer (which has no blindness) + external signal |
