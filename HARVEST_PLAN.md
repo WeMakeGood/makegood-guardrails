@@ -131,12 +131,20 @@ makegood-guardrails/
         REPORT.md                           (the operator-facing report)
 ```
 
-### Baseline corpus protocol (settled 2026-07-15)
+### Baseline corpus protocol (settled 2026-07-15; revised same day)
 
-**Hybrid: model-spec'd and model-screened, human-authored.** A model-*synthesized* baseline was considered and rejected — the baseline defines human density for the constructions the model overuses, so a model-authored baseline carries the measured generation's own densities and collapses the deltas toward zero (and would duplicate arm A while wearing a "human" label).
+**Hybrid: model-spec'd and model-screened, human-authored — by generic excellent writers, not by Make Good.** Two rejected designs, both for the same class of reason:
 
-- **The model does:** corpus specification (genre stratification matched to the battery, length bands, register), sourcing and screening (criteria: verifiable pre-2023 publication, human-authorship confidence, genre fit), normalization/dedupe, calibration computation, and the provenance ledger in `baseline/README.md`.
-- **Humans authored:** Make Good archives (Managed Word–era published copy, newsletters, appeal letters, the founder writing samples behind the library's voice profiles) plus published pre-2023 nonprofit-sector writing mined from public sources. Internal measurement use only; never redistributed. Nothing model-authored enters the baseline.
+- A model-*synthesized* baseline: the baseline defines human density for the constructions the model overuses, so a model-authored baseline carries the measured generation's own densities and collapses the deltas toward zero (and would duplicate arm A while wearing a "human" label).
+- A **Make Good–archives baseline** (the original draft): S0 is a *normalizer* — a generic practitioner floor, with voice specificity delegated to loaded voice profiles (S0 2.0.1 precedence: the profile is the voice, S0 is the floor). Calibrating thresholds on the founders' or the org's own writing would define "human density" as one house style's density, blinding the detector wherever that style runs hot. A normalizer is normed on the population, not on one speaker.
+
+The protocol:
+
+- **The model does:** corpus specification (genre stratification matched to the battery, length bands, register), sourcing and screening, structure-preserving anonymization, normalization/dedupe, calibration computation, and the provenance ledger in `baseline/README.md`. Nothing model-authored enters the baseline.
+- **Humans authored — generic and excellent:** published pre-2023 professional writing from many authors and organizations, selected genre-by-genre (celebrated appeal letters, exemplary organizational copy, well-edited annual-report and editorial prose, etc.). Sector-shaped genres (appeals, grant narratives) use excellent examples from other organizations; generic genres draw across sectors deliberately. Internal measurement use only; never redistributed.
+- **Quality screen:** a candidate sample enters only if it would itself pass S0's gates (earned claims, point-first, medium's shape). Not circular — the gates screen claims and structure; the thresholds then measure the density envelope of gate-passing prose, a different axis. Baseline on average professional writing and you calibrate the floor to the failure.
+- **Diversity cap:** no author or organization contributes more than ~2 samples — the guard against celebrity-stylist bias (one famous voice becoming "human normal").
+- **Anonymization is structure-preserving:** proper nouns swapped 1:1 with fictional equivalents of the same shape (org→org, person→person, place→place); nothing else edited — genericizing a name to "the organization" would distort the noun-repetition and rhythm metrics being measured. Anonymized text lives in the corpus; true source and date live in the ledger, so auditability survives.
 - **Synthesis gets the negative-control job:** deliberately tic-maximal model-generated samples live in `baseline/negative-controls/` as detector *sensitivity* unit tests — if a metric doesn't fire on them, the metric is broken. They are never part of the baseline and never used for calibration.
 - Target size: 4–6 samples per battery genre at ~400–700 words (~40–70 samples). Assembled and frozen before the first harvest; a held-out split is reserved for judge pairing (Component 5).
 

@@ -8,26 +8,57 @@ assembly specification and, once assembled, the permanent provenance record.
 
 The frozen human-writing baseline that defines *human density* for every
 metric in HARVEST_PLAN.md Component 4. All backstop thresholds are ratios
-against it. It is the one artifact in the harvest that must never contain
-model-authored text — a model-written baseline carries the measured
-generation's own densities and collapses the deltas to zero
-(HARVEST_PLAN.md, "Baseline corpus protocol").
+against it.
 
-## Assembly protocol (hybrid — settled 2026-07-15)
+Two things this corpus must never be (HARVEST_PLAN.md, "Baseline corpus
+protocol" — both rejected designs):
 
-- **The model does:** specification, sourcing, screening, normalization,
-  dedupe, calibration computation, and this ledger. It authors nothing that
-  enters the corpus.
-- **Humans authored the content.** Sources, in priority order:
-  1. Make Good archives — Managed Word–era published copy, newsletters,
-     appeal letters, and the founder writing samples behind the library's
-     voice profiles. <!-- TODO: Determine where the raw founder writing samples and Managed Word archives live on disk. -->
-  2. Published pre-2023 nonprofit-sector writing mined from public sources —
-     real annual reports, donor letters, program pages, case studies.
-- **Screening criteria (all three required per sample):** verifiable pre-2023
-  publication; human-authorship confidence; genre fit to the battery.
-- **Weighting:** pre-2023 because human writing is increasingly
-  model-inflected. The corpus is frozen once assembled — it never grows.
+1. **Model-authored.** A model-written baseline carries the measured
+   generation's own densities and collapses the deltas to zero.
+2. **Make Good's own writing.** S0 is a *normalizer* — a generic practitioner
+   floor; voice specificity is the voice profiles' job (S0 2.0.1 precedence).
+   Calibrating on the org's or founders' writing would define "human density"
+   as one house style's density and blind the detector wherever that style
+   runs hot. The baseline is normed on the population of excellent
+   professional writers, not on one speaker.
+
+## Assembly protocol (hybrid — settled 2026-07-15, revised same day)
+
+- **The model does:** specification, sourcing, screening, structure-preserving
+  anonymization, normalization, dedupe, calibration computation, and this
+  ledger. It authors nothing that enters the corpus.
+- **Humans authored — generic and excellent.** Published pre-2023 professional
+  writing from many authors and organizations, selected genre-by-genre.
+  Candidate pools: celebrated appeal-letter archives (e.g. SOFII's showcase),
+  exemplary organizational copy cited in the copywriting and nonprofit-
+  communications literature, well-edited annual-report and foundation-letter
+  prose, strongly edited pre-2023 editorial/op-ed writing, newspaper
+  profile/obit bios. Sector-shaped genres (appeals, grant narratives) use
+  excellent examples from *other* organizations; generic genres draw across
+  sectors deliberately. Sources are proposed by the model and vetoed/extended
+  by the operator. <!-- TODO: collect Chris's suggested sources (writers, orgs, editors he trusts) into the pool before assembly. -->
+- **Screening criteria (all required per sample):**
+  1. Verifiable pre-2023 publication (contamination guard — human writing is
+     increasingly model-inflected).
+  2. Human-authorship confidence.
+  3. Genre fit to the battery.
+  4. **Quality screen:** the sample would itself pass S0's gates (earned
+     claims, point-first, medium's shape). Baseline on average professional
+     writing and you calibrate the floor to the failure.
+- **Diversity cap:** no author or organization contributes more than ~2
+  samples — the guard against one famous voice becoming "human normal."
+- **Frozen once assembled** — the corpus never grows.
+
+## Anonymization (structure-preserving)
+
+Proper nouns are swapped 1:1 with fictional equivalents of the same shape —
+organization → fictional organization, person → fictional person, place →
+fictional place. **Nothing else is edited.** Genericizing a name to "the
+organization" would distort the noun-repetition and rhythm metrics this
+corpus exists to calibrate. Anonymization also removes a judge shortcut
+(recognizing a real org's copy as human) and keeps an internal corpus of
+third-party text low-sensitivity. The corpus file holds the anonymized text;
+the ledger below holds the true source — auditability survives.
 
 ## Target composition
 
@@ -65,9 +96,9 @@ judging. This is the only sanctioned model-authored content in `baseline/`.
 
 ## Provenance ledger
 
-One row per sample, added at assembly time. The ledger is what makes the
-corpus auditable and the freeze enforceable.
+One row per sample, added at assembly time. True source stays here; the
+corpus file carries the anonymized text.
 
-| ID | Genre | Source (publication/archive) | Pub. date | Words | Split | Screened by | Notes |
-|---|---|---|---|---|---|---|---|
-| *(none yet)* | | | | | | | |
+| ID | Genre | True source (publication/org) | Pub. date | Words | Anonymization map ref | Split | Screened by | Notes |
+|---|---|---|---|---|---|---|---|---|
+| *(none yet)* | | | | | | | | |
