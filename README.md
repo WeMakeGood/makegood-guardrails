@@ -2,10 +2,11 @@
 
 The single source of truth for Make Good's behavioral guardrail modules — the always-load standards that govern how every agent in every Make Good context library reasons and writes.
 
-This repo holds two modules:
+This repo holds two modules and one spliced artifact:
 
 - **`modules/F0_agent_behavioral_standards.md`** — process gates governing how *any* agent produces output (sourcing, marking inference vs. analysis, reframing, second-order checks, generalization). Loaded by every agent in every library.
-- **`modules/S0_natural_prose_standards.md`** — writing standards for external-facing content (practitioner voice, earned claims, leading with the point). Loaded by agents that produce external content.
+- **`modules/S0_natural_prose_standards.md`** — writing standards for external-facing content (practitioner voice, earned claims, leading with the point, the medium's shape). Loaded by agents that produce external content. The durable *core*: gates and discipline only.
+- **`modules/S0_backstop.md`** — the current-generation prose-signature list (tics, density thresholds, remedies). Independently versioned because it tracks the *model landscape* rather than the prose philosophy; spliced into the vendored S0 between `BACKSTOP:BEGIN/END` markers at resolve time, so consumers still receive a single S0 file. Maintained by measurement, not recollection — see `HARVEST_PLAN.md` for the harvest protocol that proposes each update (human-reviewed before release).
 
 ## Why this repo exists
 
@@ -22,7 +23,7 @@ See `IMPLEMENTATION_PLAN.md` for the full design, the per-library lock format, d
 
 ## Versioning
 
-Each module is versioned independently with its own semver git tags (`f0-vX.Y.Z`, `s0-vX.Y.Z`). They change on different cadences — S0 rarely, F0 more often — so a stable S0 is not re-versioned every time F0 moves.
+Each module is versioned independently with its own semver git tags (`f0-vX.Y.Z`, `s0-vX.Y.Z`, `s0-backstop-vX.Y.Z`). They change on different cadences — the S0 core rarely, F0 occasionally, the backstop at every harvest — so a stable artifact is not re-versioned every time another moves.
 
 - **Patch** — wording clarification, no change to what a gate makes an agent do.
 - **Minor** — a gate added or extended additively.

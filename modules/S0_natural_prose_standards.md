@@ -3,9 +3,9 @@ module_id: S0
 module_name: Natural Prose Standards
 tier: shared
 purpose: "Define writing standards for external-facing content"
-version: 1.0.0
+version: 2.0.0
 used_by: [Content & Communications, Thought Leadership, LeadersPath, Client Engagement]
-last_updated: 2026-03-10
+last_updated: 2026-07-15
 ---
 
 # Natural Prose Standards
@@ -18,17 +18,21 @@ This module defines writing standards for agents producing external-facing conte
 
 **Skip for:** Internal documentation, research notes, and working documents.
 
+This module is the floor, not the voice. When a voice profile or personal style guide is also loaded, that document supplies the voice and this module supplies the discipline underneath it — see the first gate.
+
 ---
 
 ## Process Gate: Write From a Practitioner's Voice
 
 Before writing any external-facing content, complete this sequence:
 
-1. **Identify the practitioner.** Who in this organization would write this if AI didn't exist? A senior consultant? A program director? A founder writing to their community? Name the role.
-2. **Adopt their perspective.** Write as that person — their vocabulary, their sentence rhythms, their level of formality. A consultant writing a proposal uses different language than a director writing a newsletter.
+1. **Identify the practitioner.** If a voice profile or personal style guide is loaded, that person is the practitioner — use the profile; do not infer a generic one alongside it. Otherwise: who in this organization would write this if AI didn't exist? A senior consultant? A program director? A founder writing to their community? Name the role.
+2. **Adopt their perspective.** Write as that person — their vocabulary, their sentence rhythms, their level of formality. When a voice profile is loaded, its specific patterns override this module's generic guidance wherever the two differ on voice. A consultant writing a proposal uses different language than a director writing a newsletter.
 3. **Test each sentence.** Would that practitioner actually write this sentence? If it sounds like a language model instead of that person, rewrite it from their perspective.
 
 This gate is the primary defense. A senior consultant doesn't "delve into" anything or call their work "transformative." They describe what they did and what happened. Writing from a specific human voice eliminates most AI patterns because those patterns don't belong to any human voice.
+
+**Precedence:** a loaded voice profile wins on voice — word choice, rhythm, formality, signature constructions. It never wins against the claims gates below: no voice profile licenses an unsupported claim, a buried lead, or chat-shaped formatting in a prose deliverable. The profile is the voice; the gates are the floor.
 
 ---
 
@@ -58,9 +62,21 @@ This gate eliminates formulaic openings ("In today's rapidly evolving landscape.
 
 ---
 
+## Process Gate: Write in the Medium's Shape
+
+Before formatting any deliverable, complete this sequence:
+
+1. **Name the medium and its native shape.** A donor letter is paragraphs. An essay or blog post is prose with occasional headers at most. Website copy is short sections. A report carries headers and the occasional table. A social post follows its platform's conventions. Headers every few sentences, bolded lead-in phrases, and bullet lists carrying the argument are the native shape of exactly one medium: a chat interface.
+2. **Check the draft against the medium, not against scannability.** Would this deliverable, printed and handed over, look like the practitioner made it? A director's donor letter with three headers and a bulleted list was not written by the director.
+3. **If the formatting is chat-shaped and the medium is prose, rewrite as prose.** Bullets become sentences with the connective reasoning restored. Bolded lead-ins become topic sentences. Headers dissolve into paragraph transitions. The argument usually improves, because the bullets were hiding the missing connections between points.
+
+This gate exists because the model's default output shape is the interface it converses in, and that shape leaks into deliverables that have their own conventions.
+
+---
+
 ## Writing Discipline
 
-These are not a checklist. They are consequences of the three gates above, stated explicitly because the LLM's statistical defaults resist them.
+These are not a checklist. They are consequences of the gates above, stated explicitly because the LLM's statistical defaults resist them.
 
 **Use the simplest verb that's accurate.** "Is" instead of "serves as." "Shows" instead of "demonstrates." "Uses" instead of "leverages." The practitioner voice gate produces this naturally — practitioners use plain language — but the LLM's training distribution pulls toward inflated verbs. When you notice an inflated verb, it means the practitioner voice slipped. Return to the gate.
 
@@ -74,15 +90,13 @@ These are not a checklist. They are consequences of the three gates above, state
 
 ## Revision Backstop
 
-The three process gates handle the architecture. This backstop catches the LLM's strongest statistical defaults — words and phrases so deeply embedded in the training distribution that they slip through even with good voice framing.
+The process gates handle the architecture. This backstop catches the statistical defaults of the current model generation — patterns that slip through even with good voice framing. It is measured by harvest against real model output, not recalled, and it is versioned separately from this module so it can track the model landscape without re-versioning the gates.
 
-**When you find one of these, don't just swap the word.** Return to the practitioner voice gate and rewrite the sentence from that person's perspective. The word is a symptom; the lost voice is the problem.
+**When an entry fires, don't just fix the instance.** Return to the practitioner voice gate and rewrite the sentence from that person's perspective. The pattern is a symptom; the lost voice is the problem.
 
-Words that no practitioner in any field uses in normal writing: delve, foster, garner, holistic, synergy, elevate, harness, realm, myriad, unpack, tapestry, nestled, pivotal, cornerstone
-
-Words that practitioners use occasionally but LLMs use constantly — flag and reconsider: leverage, robust, navigate (figurative), journey (figurative), empower, transformative, seamless, cutting-edge, groundbreaking, game-changer, unlock, deep dive, crucial, vital, showcases, boasts, testament to, underscores, highlights, vibrant
-
-Phrases that signal bot, not person: "I'd be happy to," "Great question!," "What a fantastic question!," "Thank you for sharing this!," "absolutely," "definitely," "certainly" (as empty affirmation)
+<!-- BACKSTOP:BEGIN -->
+<!-- Resolved from the s0-backstop artifact at vendor time by build-deploy-bundles.py --resolve-guardrails. Do not hand-edit between these markers. -->
+<!-- BACKSTOP:END -->
 
 ---
 
