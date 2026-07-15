@@ -3,7 +3,7 @@ module_id: S0
 module_name: Natural Prose Standards
 tier: shared
 purpose: "Define writing standards for external-facing content"
-version: 2.0.0
+version: 2.0.1
 used_by: [Content & Communications, Thought Leadership, LeadersPath, Client Engagement]
 last_updated: 2026-07-15
 ---
@@ -66,8 +66,8 @@ This gate eliminates formulaic openings ("In today's rapidly evolving landscape.
 
 Before formatting any deliverable, complete this sequence:
 
-1. **Name the medium and its native shape.** A donor letter is paragraphs. An essay or blog post is prose with occasional headers at most. Website copy is short sections. A report carries headers and the occasional table. A social post follows its platform's conventions. Headers every few sentences, bolded lead-in phrases, and bullet lists carrying the argument are the native shape of exactly one medium: a chat interface.
-2. **Check the draft against the medium, not against scannability.** Would this deliverable, printed and handed over, look like the practitioner made it? A director's donor letter with three headers and a bulleted list was not written by the director.
+1. **Name the medium and its native shape.** A letter is paragraphs. An essay or blog post is prose with occasional headers at most. Website copy is short sections. A report carries headers and the occasional table. A social post follows its platform's conventions. Headers every few sentences, bolded lead-in phrases, and bullet lists carrying the argument are the native shape of exactly one medium: a chat interface.
+2. **Check the draft against the medium, not against scannability.** Would this deliverable, printed and handed over, look like the practitioner made it? A letter over someone's signature with three headers and a bulleted list was not written by that person.
 3. **If the formatting is chat-shaped and the medium is prose, rewrite as prose.** Bullets become sentences with the connective reasoning restored. Bolded lead-ins become topic sentences. Headers dissolve into paragraph transitions. The argument usually improves, because the bullets were hiding the missing connections between points.
 
 This gate exists because the model's default output shape is the interface it converses in, and that shape leaks into deliverables that have their own conventions.
@@ -80,7 +80,7 @@ These are not a checklist. They are consequences of the gates above, stated expl
 
 **Use the simplest verb that's accurate.** "Is" instead of "serves as." "Shows" instead of "demonstrates." "Uses" instead of "leverages." The practitioner voice gate produces this naturally — practitioners use plain language — but the LLM's training distribution pulls toward inflated verbs. When you notice an inflated verb, it means the practitioner voice slipped. Return to the gate.
 
-**Repeat nouns rather than cycling synonyms.** "The organization... the organization... they" is clearer than "The organization... the nonprofit... the entity... the group." Synonym cycling is an LLM pattern — humans repeat words comfortably. When you notice yourself reaching for a synonym you wouldn't say aloud, the voice has slipped.
+**Repeat nouns rather than cycling synonyms.** "The organization... the organization... they" is clearer than "The organization... the institution... the entity... the group." Synonym cycling is an LLM pattern — humans repeat words comfortably. When you notice yourself reaching for a synonym you wouldn't say aloud, the voice has slipped.
 
 **Name the source or state the claim directly.** "Experts say" and "industry leaders suggest" are vague attribution — a pattern that sounds authoritative while citing nothing. The practitioner either knows the source and names it, or states the claim on their own authority.
 

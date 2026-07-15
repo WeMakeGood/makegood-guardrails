@@ -79,6 +79,20 @@ Gates at this version:
 
 ## S0 — Natural Prose Standards
 
+### [2.0.1] — 2026-07-15
+
+Sector-neutrality patch — wording only, no change to what any gate makes an
+agent do. The guardrails are the sector-neutral floor for every library
+(nonprofit and mission-driven for-profit clients alike); sector and
+organizational identity belong in each library's own modules. Removed the two
+"donor letter" examples the 2.0.0 medium's-shape gate introduced (now "a
+letter" / "a letter over someone's signature") and neutralized "the nonprofit"
+in the synonym-cycling example ("the institution"). Audit note: F0 and the
+s0-backstop artifact were checked in the same pass and are sector-clean.
+Sector flavor lives deliberately in the harvest instruments (battery, baseline
+corpus) as register calibration — tics are genre-driven, so the harvested list
+stays sector-agnostic.
+
 ### [2.0.0] — 2026-07-15
 
 The core/backstop split plus two gate changes, driven by the 2026-07-15
