@@ -119,19 +119,23 @@ makegood-guardrails/
       rotating.md                           (R-pool; 4 selected per harvest)
     baseline/
       README.md                             (reference-layer spec + rules)
-      panel.jsonl                           (identification-panel ledger: citations + per-text derived stats; source of truth)
+      exemplars/                            (THE BASELINE: per-brief synthetic exemplars, frozen + human-approved)
+        README.md                           (exemplar provenance + generation rules)
+        F01/ … F12/exemplar.md              (one craft-strong exemplar per core brief)
+      panel.jsonl                           (human-writing ledger: citations + per-text stats; craft-study input + grounding, NOT the baseline)
       panel.md                              (human-readable panel view)
-      craft/                                (per-genre craft profiles — extracted from the panel)
-      fingerprints/                         (per-genre aggregate distributions — the OPEN reference for discovery)
-      metrics-baseline.json                 (known-tic envelopes — regression reference only, never the discovery instrument)
-      exemplars/                            (the synthetic baseline: per-battery-prompt exemplar responses, human-approved)
-      constructions/
+      metrics-baseline.json                 (known-tic envelopes — regression reference only, never the discovery instrument) [when needed]
+      craft/                                (OPTIONAL/future: per-genre craft profiles — roadmap enrichment)
+      fingerprints/                         (OPTIONAL/future: per-genre aggregate distributions — second discovery reference)
+      constructions/                        (when regression-checking known entries)
         positive/                           (inside envelope — regression metrics must NOT fire)
         negative/                           (tic-maximal — regression metrics MUST fire)
     scripts/
+      tic_finder.py                         (open discovery diff — Component 4a; the discovery instrument)
       measure_density.py                    (known-tic regression counter — Component 4b)
       extract_body.py                       (prose-boundary preprocessing)
       scan_sources.py                       (panel source-drop triage)
+    ROADMAP.md                              (what's built, what's next: blind judge, scale, enrichment)
     reports/
       2026-07-sonnet-5/                     (one directory per harvest)
         outputs/                            (raw generations, both arms)
@@ -141,34 +145,30 @@ makegood-guardrails/
         REPORT.md                           (the operator-facing report)
 ```
 
-### Reference architecture: example study → synthetic baseline → differential testing (settled 2026-07-16, fourth revision)
+### Reference architecture: frozen synthetic baseline → differential testing (working design, settled 2026-07-16)
 
 **The purpose, stated first because getting it wrong invalidated three designs:** the reference layer must make it possible to identify problems that appear in *later* models — patterns nobody has named yet — and to test for them reproducibly. A closed set of known-tic metrics can only re-measure what's already named; a baseline expressed as tic-count envelopes is the stale-recollection failure mode wearing a quantitative costume. Four rejected designs:
 
-1. A freely model-*synthesized* baseline — carries the measuring generation's own densities; the ruler measures itself.
+1. A freely model-*synthesized* baseline — carries the measuring generation's own densities; the ruler measures itself. (Escaped by generating with a *different* generation than the target and craft-sourcing from real human writing.)
 2. A **Make Good–archives baseline** — S0 is a *normalizer* (generic practitioner floor; voice specificity is the voice profiles' job per S0 2.0.1 precedence); one house style must not define "human normal."
 3. A **curated fixed-length human-sample corpus** — fixed word-count bands ignore genre length reality, and any hand-curated human set is too small to test against.
-4. An **identification panel reduced to known-tic envelopes** (the third revision) — structurally incapable of surfacing an unnamed tic, because there is no column for it. Real writing measured only on the 12 named metrics answers "how much do humans use the tics we already know?" — which is not the question.
+4. An **identification panel reduced to known-tic envelopes** — structurally incapable of surfacing an unnamed tic, because there is no column for it. Measuring real writing only on the 12 named metrics answers "how much do humans use the tics we already know?" — not the question.
 
-The corrected design is three layers. Collected real examples create a synthetic baseline; testing is open comparison against it.
+A fifth design (the "v4" three-layer plan: collected panel → craft profiles + fingerprints → exemplars → differential testing) was **correct but heavier than needed.** In practice the collect/screen/discard corpus work was the bottleneck and wasn't required to reach the goal. The **working design** keeps v4's principle (*discovery over confirmation*) and its invariants, and simplifies the machinery: the synthetic exemplars **are** the baseline; the human panel is craft-input + grounding, not a required product pipeline.
 
-**Layer 1 — Example study (real writing, collected and studied — not tic-counted).** The identification panel continues under its existing rules (contamination guard, idiolect diversity cap, prose-boundary preprocessing — see `baseline/README.md`), but its products change:
+**The baseline — a frozen synthetic reference set.** For every battery brief, a craft-strong **exemplar** (`baseline/exemplars/<prompt-id>/exemplar.md`), written to the *same context card and same brief* the battery uses. Task-matching is the property only synthesis provides and the reason this works — a real feature can never be about Harbor Bend, so a diff against real text is confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. Generation rules (full detail in `baseline/exemplars/README.md`): **different model generation** than the targets (the cross-generation guard); **no S0/F0/backstop/tic-list** in the generator's context (sourcing the reference with our tic theory would re-close the discovery loop); **craft-sourced** (the generator studies real human writing, then writes in its own voice); **human-approved once**, then frozen and reused; regeneration is a versioned re-approval event. Economical (no collection treadmill), repeatable (one fixed yardstick across models over time), task-matched.
 
-- **Craft profiles**, one per battery genre (`baseline/craft/<genre>.md`) — the extracted characterization of how excellent writing in that genre works: structure, movement, evidence use, rhythm, restraint, register. This is the qualitative "elements we identify in samples."
-- **Open reference fingerprints** (`baseline/fingerprints/<genre>.json`) — aggregate distributional data pooled per genre: token and n-gram frequency tables, full punctuation-mark distributions, sentence-length and paragraph-shape histograms. Aggregated across texts (no individual text reconstructible), so measure-and-cite still holds. This is the *open* feature space — not a metric list — that lets a never-named pattern surface as an unexplained over-representation.
-- **Known-tic regression envelopes** (`metrics-baseline.json`) — the Component-4 metric measurements, retained and demoted: they confirm and retire *existing* backstop entries and place thresholds. They are a regression suite, not the discovery instrument.
+**The human panel — craft input + grounding, not the baseline.** The measured human texts (`panel.jsonl`) are what the generator *studies* to write craft-strong exemplars, and the reference a discovered candidate is grounding-checked against. It never grows on a schedule; it is enrichment, not a harvest blocker.
 
-**Layer 2 — The synthetic baseline (the testable standard).** For every battery prompt, one or more **exemplar responses** (`baseline/exemplars/<prompt-id>/`): written to the *same context card and same brief*, embodying the genre's craft profile. Task-matching is the property only synthesis can provide and the reason this works — a real Atlantic feature can never be about Harbor Bend, so differences against real text are confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. Exemplar rules: generated by a **different model generation** than any harvest target; checked against the craft profile; **human-approved once** (a bounded review of ~16 short texts — review, not authoring) and then reused across harvests; regeneration (new battery prompt, revised craft profile) is a versioned re-approval event.
+**Differential testing (the discovery engine).** Same brief, model output vs. exemplar:
 
-**Layer 3 — Differential testing (the discovery engine).** Same brief, model output vs. exemplar — enumerate what differs, on open feature spaces:
+- **Open statistical diff (`scripts/tic_finder.py`, Component 4a):** pooled arm-B outputs vs. pooled exemplars, ranked by log-odds over-representation (words, n-grams, punctuation, sentence openings, sentence shapes). No pre-named columns; a new tic surfaces as an over-representation. *Proven:* Opus-4.8 arm-A × 12 briefs pooled surfaced dash-overuse, spaced-dash, colon-led elaboration, and formulaic openings — known current-gen syntactic tics, discovered not recalled.
+- **Holistic judge diff (Component 5, planned):** the judge reads both responses to the same brief and enumerates every systematic difference in *how* they are written — not "which is the machine." Finds tics at any N (no pooling needed). Not yet built — see `harvest/ROADMAP.md`.
+- **Known-tic regression (`scripts/measure_density.py`, Component 4b):** the named metrics, run against outputs and (when present) envelopes to confirm/retire current backstop entries.
 
-- **Open statistical diff:** pooled arm-B outputs vs. pooled exemplars per genre, ranked by log-odds over-representation (words, n-grams, punctuation, constructions, sentence shapes). No pre-named columns; a new tic surfaces as an unexplained over-representation. A second pass diffs target outputs against the **Layer-1 fingerprints** (genre-level, real-writing reference) — immune to exemplar-generator contamination.
-- **Holistic judge diff (Component 5):** the judge reads both responses to the same brief and enumerates every systematic difference in *how* they are written — not "which is the machine." Recurring differences across prompts are candidates.
-- **Known-tic regression (Component 4):** the named metrics, run against outputs and envelopes to confirm/retire current backstop entries.
+**Grounding invariant:** real writing remains the arbiter. A candidate from any diff enters `candidates.md` only after a **confirmation check against real writing** — if the pattern occurs at comparable rates in excellent human prose (the panel, optional fingerprints, or a fresh check), it is craft, not tic. Synthetic exemplars are the *instrument* of comparison, never the *authority* for what counts as human.
 
-**Grounding invariant (replaces the v3 threshold invariant):** real examples remain the arbiter. A candidate discovered by any diff enters `candidates.md` only after a **confirmation check against the real examples** — if the pattern occurs at comparable rates in the collected excellent writing (checked via the fingerprints, or by re-fetching cited panel texts), it is craft, not tic. Synthetic exemplars are the *instrument* of comparison, never the *authority* for what counts as human.
-
-**Named blind spot:** a tic shared by the exemplar generator and the harvest target cancels out of the task-matched diff. Coverage: the fingerprint-level diff against real writing, the external-signal detector (Component 6), and cross-generation exemplar production. A recurring judge finding on the *exemplar* side is itself signal — either exemplar-quality feedback or the exemplar generator's own signature, and either way it feeds the next identification pass.
+**Named blind spot:** a tic shared by the exemplar generator and the target cancels out of the task-matched diff. Craft-sourcing raises this risk (it made exemplars more stylistically assertive — moves AI overuses). Coverage: the planned blind-judge leg (never sees the reference), the external-signal detector (Component 6), the cross-generation guard, and grounding against real writing. **Optional future enrichment** (`baseline/fingerprints/`, `baseline/craft/`) would add a second, real-writing diff reference immune to exemplar-generator contamination; on the roadmap, not the critical path.
 
 ---
 
