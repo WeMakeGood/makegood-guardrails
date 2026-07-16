@@ -14,11 +14,12 @@ single model) when an operator flags a suspected new pattern in production.
 
 ## H0 — Preconditions
 
-- [ ] Identification pass run (`baseline/panel.md` populated; `baseline/metrics-baseline.json` carries per-genre envelopes). **First harvest only:** run it first — the counting stage has no denominators without it. Panel rules in `baseline/README.md`.
-- [ ] Positive and negative controls exist in `baseline/constructions/` and the counters behave correctly on both (fire on negative, silent on positive).
+- [ ] Layer-1 products exist (`baseline/README.md §2`): `panel.jsonl` at target scale for the genres in play; `craft/<genre>.md` craft profiles; `fingerprints/<genre>.json` open fingerprints; `metrics-baseline.json` regression envelopes. **First harvest only:** run the identification pass first.
+- [ ] Exemplars exist for every battery prompt in play (`baseline/exemplars/<prompt-id>/`), craft-profile-checked and **human-approved** (`baseline/README.md §3`).
+- [ ] Positive and negative controls exist in `baseline/constructions/` and the 4b regression metrics behave correctly on both (fire on negative, silent on positive).
 - [ ] Target model list confirmed = the models Make Good libraries currently deploy on.
-- [ ] Judge model AND foil-generator model chosen — each a **different generation** than any harvest target; record both now.
-- [ ] Create `reports/<YYYY-MM>-<models>/` with `outputs/`, `judgments/`, `foils/` subdirectories.
+- [ ] Judge model AND exemplar-generator model recorded — each a **different generation** than any harvest target, and different from each other where possible.
+- [ ] Create `reports/<YYYY-MM>-<models>/` with `outputs/`, `judgments/` subdirectories.
 
 ## H1 — Compose the battery
 
@@ -37,27 +38,29 @@ Per model × per arm × per prompt, **fresh context every prompt**:
 - [ ] Save each output to `outputs/<model>/<arm>/<prompt-id>.md`, verbatim, no edits.
 - [ ] No voice profiles, no other modules, no backstop in either arm.
 
-## H3 — Count (statistical detector)
+## H3 — Statistical detection: open diff (discovery) + known-tic regression
 
-- [ ] **Preprocess identically to the panel:** strip non-prose scaffolding before measuring (the "measure prose, not scaffolding" rule in `baseline/README.md §1`). The same rule must govern panel texts and battery outputs, or envelope and measurements aren't comparable.
-- [ ] Measure every Component-4 metric per output with `scripts/measure_density.py` (agent-assisted spot-checks until the script is trusted; the script is available now — Phase 1). Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`.
-- [ ] Compute **envelope deviation** per (model, arm): each metric's distance from the panel's per-genre human envelope (`baseline/metrics-baseline.json`). This is the harvest's headline number.
-- [ ] Flag candidates per the rule: metric outside the envelope in ≥ 60% of arm-B outputs for a model.
-- [ ] Control check both directions: every metric must **fire** on `baseline/constructions/negative/` and stay **silent** on `baseline/constructions/positive/`. A metric failing either is broken or mis-thresholded; fix before trusting its arm-B numbers.
+- [ ] **Preprocess identically to the panel:** strip non-prose scaffolding before any measurement (the rule in `baseline/README.md §1`; `scripts/extract_body.py`). The same rule must govern panel texts, exemplars, and battery outputs, or nothing is comparable.
+- [ ] **4a — open diff (the discovery layer):** pooled per (model, genre), compute over-representation rankings (log-odds keyness on unigrams, n-grams, punctuation marks, sentence shapes, openings, formatting elements) of arm-B outputs against **both** references: the pooled exemplars for the same prompts (task-matched) and `fingerprints/<genre>.json` (real writing, genre-level). Agent-assisted in Phase 1. Write ranked findings to `reports/<id>/diff-findings.md`. **Discovery rule:** a feature over-represented in both comparisons (or strongly in one with judge corroboration), recurring across prompts, is a candidate — named by a human at compile time.
+- [ ] **4b — known-tic regression:** measure the named metrics per output with `scripts/measure_density.py`; compare against `metrics-baseline.json` envelopes. Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`. **Regression rule:** a known metric flags in ≥ 60% of arm-B outputs → the corresponding backstop entry is confirmed; entries with no leakage move toward retirement.
+- [ ] Control check the 4b suite both directions: every metric must **fire** on `constructions/negative/` and stay **silent** on `constructions/positive/`. A metric failing either is broken or mis-thresholded; fix before trusting its numbers.
 
-## H4 — Judge (blind cross-model detector)
+## H4 — Judge: same-brief differential reading
 
-- [ ] **Generate foils:** for each arm-B output, a genre- and length-matched synthetic foil from the foil-generator model (different generation than the target), constrained to the panel envelope. Run the counters on each foil; discard and regenerate any that land outside the envelope. Save to `reports/<id>/foils/`.
-- [ ] Pair each arm-B output with its foil. Randomize A/B order; strip provenance.
-- [ ] Judge model, fresh context per pair, this prompt:
+- [ ] Pair each arm-B output with the **exemplar for the same battery prompt** (`baseline/exemplars/<prompt-id>/`). Randomize A/B order; strip provenance; the judge is not told which is which.
+- [ ] Judge model (recorded at H0; different generation than target and exemplar generator), fresh context per pair, this prompt:
 
-> One of these two passages shows the writing patterns of an unconstrained AI
-> model; the other does not. 1) Which shows them, A or B? 2) Confidence
-> (low/medium/high). 3) List the specific features that gave it away — quote
-> the exact phrases or describe the exact constructions. 4) List any features
-> that made the *other* passage read as disciplined human-style prose.
+> These are two responses to the same brief, working from the same fact sheet.
+> Compare **how they are written**, not what they say. 1) Enumerate every
+> systematic difference in the writing — structure, rhythm, sentence and
+> paragraph shapes, word choice, emphasis habits, formatting, how evidence is
+> used. Quote exact phrases for each. 2) For each difference, name which
+> passage does it. 3) If either passage shows patterns that read as *generated
+> habits imposed on the content* rather than choices serving it, name them
+> specifically.
 
-- [ ] Save transcripts to `judgments/`. Compute: the **giveaway tally** (the judge's primary product — a giveaway mentioned across ≥ 3 pairs is a candidate; review each for whether it points at the target or at the foil generator), **foil-discrimination rate** (secondary trend line), and **gate effectiveness** (arm B vs. arm A, on both envelope deviation and discrimination). The harvest's headline number is H3's envelope deviation, not a judge output.
+- [ ] Save transcripts to `judgments/`. Compile the **difference tally**: differences clustered across pairs, each tagged with direction (target-side vs. exemplar-side). Target-side differences recurring across ≥ 3 pairs are candidates. **Exemplar-side recurring patterns are never dropped** — they are exemplar-quality feedback or the exemplar generator's signature; route them to the exemplar re-approval queue and the next identification pass.
+- [ ] Compute **gate effectiveness**: arm A vs. arm B difference volume and severity — which patterns the gates suppressed, which passed untouched.
 
 ## H5 — External signal
 
@@ -66,8 +69,9 @@ Per model × per arm × per prompt, **fresh context every prompt**:
 
 ## H6 — Compile candidates
 
-- [ ] Write `reports/<id>/candidates.md`, one row per candidate: pattern · statistical evidence (metric, delta vs. baseline, % of outputs) · judge mentions · external citations · 2–3 example excerpts · proposed threshold + remedy · proposed action (add / amend / retire / no action).
-- [ ] Apply the admission rule (≥ 2 of 3 detectors) and the retirement rule (no leakage in two consecutive harvests) from HARVEST_PLAN.md Component 7. Include the current backstop's every entry in the table — confirmed, or moved toward retirement.
+- [ ] Write `reports/<id>/candidates.md`, one row per candidate: pattern (human-named for open-diff discoveries) · evidence (over-representation stats and/or 4b regression delta, judge mentions with direction, external citations) · 2–3 example excerpts · proposed threshold + remedy · proposed action (add / amend / retire / no action).
+- [ ] **Grounding check (before admission):** confirm each discovered candidate against the real examples — via `fingerprints/<genre>.json`, or by re-fetching cited panel texts. A pattern occurring at comparable rates in the collected excellent writing is craft, not tic: reject it. Record the check's result in the row.
+- [ ] Apply the admission rule (≥ 2 of 3 detector families) and the retirement rule (no leakage in two consecutive harvests) from HARVEST_PLAN.md Component 7. Include the current backstop's every entry in the table — confirmed, or moved toward retirement. Newly admitted entries each get a 4b regression metric.
 
 ## H7 — Human review (the merge gate)
 

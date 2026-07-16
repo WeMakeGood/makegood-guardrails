@@ -1,36 +1,29 @@
-# Reference Layer — Identification Panel & Synthetic Constructions
+# Reference Layer — Example Study, Synthetic Baseline, Differential Testing
 
-**Status: IDENTIFICATION PASS NOT YET RUN.** The first harvest cannot run its
-counting stage until the panel is measured and `metrics-baseline.json` exists.
+**Status: panel collection in progress (see `panel.jsonl`); craft profiles, fingerprints, and exemplars NOT YET BUILT.** The first harvest cannot run until Layer 1's products exist and the exemplars are approved.
 
-Two artifacts live here, with a strict one-way relationship:
+**Purpose (stated first — getting it wrong invalidated three designs):** this layer exists to make *currently unidentified* tics discoverable and testable in later models. It is not a known-tic scoreboard. Known-tic metrics live here only as a regression suite for existing backstop entries. (HARVEST_PLAN.md, "Reference architecture," fourth revision.)
 
 ```
-real published writing  ──measure──▶  human envelopes  ──constrain/validate──▶  synthetic constructions
-     (never stored)                (metrics-baseline.json)                    (the only stored passages)
+real published writing ──study──▶ craft profiles + open fingerprints ──constrain──▶ task-matched exemplars
+      (never stored)              (+ known-tic regression envelopes)                (the synthetic baseline)
+                                                                                           │
+model battery output ◀──────────────── open differential testing ◀────────────────────────┘
+                        (statistical keyness diff + judge differential reading)
+                                          │
+                          candidates ──grounding check against real examples──▶ backstop
 ```
 
-**Constructions never set thresholds.** Thresholds derive only from the
-measured panel. A synthetic passage that disagrees with the numbers is wrong
-by definition and is regenerated. (HARVEST_PLAN.md, "Reference architecture.")
+**Grounding invariant:** real examples are the arbiter. A discovered candidate enters `candidates.md` only after confirmation that the pattern does *not* occur at comparable rates in the collected excellent writing. Exemplars are the comparison instrument, never the authority for what counts as human.
 
 ---
 
-## 1. The identification panel (measure, never store)
+## 1. The identification panel (real writing — studied, never stored)
 
 Real, editorially excellent published writing that clears the contamination
-guard (pre-2023 by default, or a documented stronger authorship guarantee —
-see Panel rules), measured **in situ at natural length**. Every metric is length-normalized
-(per-1,000-words and per-sentence rates), so an essay is measured at its
-full natural length and a bio at its natural 90 words — no excerpting, no
-fixed word-count bands, no anonymization, no stored text. Only derived
-statistics and citations are retained.
-
-**Why not a stored sample corpus** (rejected designs, HARVEST_PLAN.md):
-fixed-length excerpts distort the density profiles being measured; any
-hand-curated human set is too small to test against; the org's own archives
-would calibrate the normalizer to one house style; and freely synthesized
-"human" text carries the measuring generation's own densities.
+guard, measured and studied **in situ at natural length** — no excerpting, no
+fixed word-count bands, no stored text. Only derived data and citations are
+retained. Ledger: `panel.jsonl` (source of truth), `panel.md` (readable view).
 
 ### Panel rules
 
@@ -39,16 +32,16 @@ would calibrate the normalizer to one house style; and freely synthesized
   organizational copy, well-edited annual-report/foundation-letter prose,
   strongly edited editorial and feature writing, newspaper profile bios.
   Model proposes; operator vetoes/extends.
-  <!-- TODO: collect Chris's suggested sources (writers, orgs, editors he trusts) before the first pass. -->
+  <!-- TODO: collect Chris's suggested sources (writers, orgs, editors he trusts) before the first pass completes. -->
 - **Screening (all required per text):** human-authorship confidence; genre
   fit; editorial excellence (the text would pass S0's gates — earned claims,
   point-first, medium's shape); **and the contamination guard below.**
 - **Contamination guard (the date is a proxy, authorship is the target).** The
-  panel exists to measure *human* density; the risk is model-inflected writing
-  poisoning the pool. The pre-2023 date is a cheap, conservative proxy for "a
-  human wrote this, not an LLM" — 2023 being when LLM-assisted writing went
-  mainstream. A text clears the guard when **either** holds, recorded per text
-  in `panel.md`:
+  panel exists to characterize *human* writing; the risk is model-inflected
+  writing poisoning the pool. The pre-2023 date is a cheap, conservative proxy
+  for "a human wrote this, not an LLM" — 2023 being when LLM-assisted writing
+  went mainstream. A text clears the guard when **either** holds, recorded per
+  text in `panel.jsonl`:
   1. **Verifiable pre-2023 publication** (the default proxy), **or**
   2. **A documented stronger authorship guarantee** than the date provides —
      a closed corpus, a deceased author, a verifiable pre-2023 print origin
@@ -67,36 +60,28 @@ would calibrate the normalizer to one house style; and freely synthesized
   authorship is more certain than the date would establish.
 - **Diversity cap (keyed on idiolect, not organization).** The contaminant the
   cap guards against is *one voice becoming "human normal"* — a single writer's
-  sentence rhythm, em-dash habit, and tics dominating the envelope. That is a
+  sentence rhythm, em-dash habit, and tics dominating the reference. That is a
   **writer**-level property, so the cap is ~2 texts per **named writer** per
   genre. An organization is not a voice: one outlet's writers are many, and its
   house style is a far weaker contaminant than a single idiolect — so the org is
-  a soft secondary note, not a hard limit. (Capping on org does the wrong thing
-  both ways: it under-counts a diverse-writer outlet and would discard the
-  variability of a deep one.) **Fallback:** when a text is unsigned (e.g. house-
-  style news) or agency-driven (the voice is the agency, not one person), cap on
-  the organization/agency instead, since that is then the idiolect-source.
-- **Scale:** 15–25 texts per battery genre, ~150–250 total. Measuring is
-  cheap; curation was the bottleneck, and there is none.
-- **Outputs:**
-  - `panel.md` — one row per text: citation, publication date, genre,
-    natural length, per-metric stats, archive link where available, and the
-    **prose-boundary note** (see Preprocessing) recording exactly what was
-    measured vs. stripped.
-  - `metrics-baseline.json` — per-genre, per-metric human envelopes
-    (median + spread). This file is what thresholds ratio against.
+  a soft secondary note, not a hard limit. **Fallback:** when a text is unsigned
+  (e.g. house-style news) or agency-driven (the voice is the agency, not one
+  person), cap on the organization/agency instead, since that is then the
+  idiolect-source.
+- **Scale:** 15–25 texts per battery genre, ~150–250 total. Studying is cheap;
+  curation was the bottleneck, and there is none.
 - **Versioning:** an identification pass is a versioned event (recorded in
-  `panel.md` and the harvest report's provenance block). Re-running with new
-  texts or new metrics produces a new version — never a silent drift.
+  `panel.jsonl` and the harvest report's provenance block). New texts, new
+  craft-profile revisions, or new fingerprint features produce a new version —
+  never a silent drift.
 
-### Preprocessing — measure prose, not scaffolding
+### Preprocessing — study prose, not scaffolding
 
-S0 governs *prose*, so the counters measure prose. Before measuring any text —
-panel text or battery output — strip non-prose structural scaffolding that
-would anchor the metrics on elements S0 does not address. **The identical rule
-applies to panel texts and to battery outputs (HARVEST.md H3); if it doesn't,
-the human envelope and the model measurements aren't comparable and every
-threshold is invalid.**
+S0 governs *prose*, so every measurement and study pass works on prose. Before
+processing any text — panel text or battery output — strip non-prose
+structural scaffolding. **The identical rule applies to panel texts and to
+battery outputs (HARVEST.md H3); if it doesn't, the reference and the model
+measurements aren't comparable.**
 
 - **Strip:** postal/mailing address blocks; dates and merge-field lines
   (`<Name>`, `<Salutation>`); letterhead and contact-info footers; email
@@ -107,38 +92,46 @@ threshold is invalid.**
   ("Dear friend,", "Yours, forever believing in magic,") — and everything
   between them. Strip only the name/title/address scaffolding around them.
 - **Headings:** keep body headings only for markdown/web-target genres, where
-  the structural metrics (`header_density`, `bullet_share`, `bold_leadin_rate`)
-  measure them on purpose. Strip headings for letter/email/bio genres, where a
-  heading is scaffolding. (`measure_density.py` reads the raw text for the
-  structural metrics and the stripped text for the prose metrics, so pass it
-  the text with prose-appropriate headings intact and `--markdown` when the
-  genre is a markdown/web target.)
-- **Record the boundary.** Because the identification pass is a versioned,
-  reproducible event, each `panel.md` row carries a short prose-boundary note —
-  what was treated as body vs. stripped (e.g. "body = salutation→P.S.; stripped
-  mailing block, dateline, signature name/title"). A second operator with the
-  same source and the same note re-derives the same numbers. Phase 1 does this
-  by agent-assisted judgment per text; a Phase 2 helper may standardize the
-  common cases.
+  the structural measurements (`header_density`, `bullet_share`,
+  `bold_leadin_rate`) study them on purpose. Strip headings for
+  letter/email/bio genres, where a heading is scaffolding.
+  (`measure_density.py` reads the raw text for the structural metrics and the
+  stripped text for the prose metrics; `extract_body.py` implements the rule.)
+- **Record the boundary.** Each `panel.jsonl` row carries a prose-boundary note
+  — what was treated as body vs. stripped — so a second operator with the same
+  source re-derives the same result.
 
-## 2. Synthetic constructions (`constructions/`)
+## 2. What the panel yields (Layer 1 products)
 
-Every stored passage in the reference layer is synthetic — constructed to
-highlight elements identified in real samples without being a sample — and
-**counter-validated against the envelope before use**.
-
-| Directory | Built to be | Counters must | Role |
+| Product | Location | What it is | Role |
 |---|---|---|---|
-| `positive/` | Inside the human envelope | **NOT fire** | Specificity unit tests — a metric that fires here is mis-thresholded |
-| `negative/` | Deliberately tic-maximal | **Fire** | Sensitivity unit tests — a metric that stays silent here is broken |
-| `foils/` | Inside the envelope; genre- and length-matched to each battery output | Not fire | Judge pairing material (Component 5) |
+| **Craft profiles** | `craft/<genre>.md` | Extracted characterization of how excellent writing in the genre works — structure, movement, evidence use, rhythm, restraint, register | Constrain and validate exemplars; teach operators |
+| **Open fingerprints** | `fingerprints/<genre>.json` | Aggregate distributions pooled per genre: token/n-gram frequency tables, all punctuation marks, sentence-length and paragraph-shape histograms. Aggregated across texts — no individual text reconstructible | The open reference for discovery diffs (4a) and grounding checks |
+| **Known-tic regression envelopes** | `metrics-baseline.json` | Per-genre envelopes for the named Component-4b metrics | Confirm/retire existing backstop entries; place thresholds. **Never the discovery instrument** |
 
-**Foil rules:** generated by a **different model generation** than the
-harvest's target model; validated by the counters; out-of-envelope foils are
-discarded and regenerated. Foils are per-harvest artifacts — store them under
-the harvest's report directory if preferred, or here with a harvest-id prefix.
+## 3. The synthetic baseline (`exemplars/`)
 
-**Known residual:** a foil's unmeasured dimensions carry its generator's
-signature. Judge giveaways are reviewed with this in mind; a giveaway that
-points at the foil rather than the target is itself useful — it becomes a
-candidate metric for the next identification pass.
+For each battery prompt, one or more **exemplar responses** — written to the
+same context card and the same brief, embodying the genre's craft profile.
+Task-matching is the property only synthesis provides: against a real text the
+diff is confounded by topic; against a task-matched exemplar, every difference
+is attributable to *how it's written*.
+
+**Exemplar rules:**
+
+- Generated by a **different model generation** than any harvest target.
+- Checked against the genre's craft profile before proposal.
+- **Human-approved once** (bounded review of ~16 short texts — review, not
+  authoring), then reused across harvests. Layout: `exemplars/<prompt-id>/`.
+- Regeneration (new battery prompt, revised craft profile, or quality feedback
+  from a harvest's exemplar-side judge findings) is a **versioned re-approval
+  event**, recorded in the harvest report's provenance block.
+
+## 4. Regression-suite controls (`constructions/`)
+
+Unit tests for the 4b known-tic metrics only — they play no role in discovery.
+
+| Directory | Built to be | 4b metrics must | Role |
+|---|---|---|---|
+| `positive/` | Inside the human envelope | **NOT fire** | Specificity — a metric that fires here is mis-thresholded |
+| `negative/` | Deliberately tic-maximal | **Fire** | Sensitivity — a metric that stays silent here is broken |
