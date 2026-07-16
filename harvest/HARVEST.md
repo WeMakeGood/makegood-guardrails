@@ -39,7 +39,8 @@ Per model × per arm × per prompt, **fresh context every prompt**:
 
 ## H3 — Count (statistical detector)
 
-- [ ] Measure every Component-4 metric per output (agent-assisted counting until `measure_density.py` ships). Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`.
+- [ ] **Preprocess identically to the panel:** strip non-prose scaffolding before measuring (the "measure prose, not scaffolding" rule in `baseline/README.md §1`). The same rule must govern panel texts and battery outputs, or envelope and measurements aren't comparable.
+- [ ] Measure every Component-4 metric per output with `scripts/measure_density.py` (agent-assisted spot-checks until the script is trusted; the script is available now — Phase 1). Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`.
 - [ ] Compute **envelope deviation** per (model, arm): each metric's distance from the panel's per-genre human envelope (`baseline/metrics-baseline.json`). This is the harvest's headline number.
 - [ ] Flag candidates per the rule: metric outside the envelope in ≥ 60% of arm-B outputs for a model.
 - [ ] Control check both directions: every metric must **fire** on `baseline/constructions/negative/` and stay **silent** on `baseline/constructions/positive/`. A metric failing either is broken or mis-thresholded; fix before trusting its arm-B numbers.

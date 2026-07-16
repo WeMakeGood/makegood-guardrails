@@ -47,12 +47,46 @@ would calibrate the normalizer to one house style; and freely synthesized
   cheap; curation was the bottleneck, and there is none.
 - **Outputs:**
   - `panel.md` — one row per text: citation, publication date, genre,
-    natural length, per-metric stats, archive link where available.
+    natural length, per-metric stats, archive link where available, and the
+    **prose-boundary note** (see Preprocessing) recording exactly what was
+    measured vs. stripped.
   - `metrics-baseline.json` — per-genre, per-metric human envelopes
     (median + spread). This file is what thresholds ratio against.
 - **Versioning:** an identification pass is a versioned event (recorded in
   `panel.md` and the harvest report's provenance block). Re-running with new
   texts or new metrics produces a new version — never a silent drift.
+
+### Preprocessing — measure prose, not scaffolding
+
+S0 governs *prose*, so the counters measure prose. Before measuring any text —
+panel text or battery output — strip non-prose structural scaffolding that
+would anchor the metrics on elements S0 does not address. **The identical rule
+applies to panel texts and to battery outputs (HARVEST.md H3); if it doesn't,
+the human envelope and the model measurements aren't comparable and every
+threshold is invalid.**
+
+- **Strip:** postal/mailing address blocks; dates and merge-field lines
+  (`<Name>`, `<Salutation>`); letterhead and contact-info footers; email
+  headers (To/From/Subject); bylines and datelines; credential/title lines
+  under a signature (e.g. "Alex Robertson, CEO"); figure captions; pull-quotes;
+  boilerplate (unsubscribe footers, legal disclaimers).
+- **Keep:** the salutation and sign-off *words* — these are prose a human wrote
+  ("Dear friend,", "Yours, forever believing in magic,") — and everything
+  between them. Strip only the name/title/address scaffolding around them.
+- **Headings:** keep body headings only for markdown/web-target genres, where
+  the structural metrics (`header_density`, `bullet_share`, `bold_leadin_rate`)
+  measure them on purpose. Strip headings for letter/email/bio genres, where a
+  heading is scaffolding. (`measure_density.py` reads the raw text for the
+  structural metrics and the stripped text for the prose metrics, so pass it
+  the text with prose-appropriate headings intact and `--markdown` when the
+  genre is a markdown/web target.)
+- **Record the boundary.** Because the identification pass is a versioned,
+  reproducible event, each `panel.md` row carries a short prose-boundary note —
+  what was treated as body vs. stripped (e.g. "body = salutation→P.S.; stripped
+  mailing block, dateline, signature name/title"). A second operator with the
+  same source and the same note re-derives the same numbers. Phase 1 does this
+  by agent-assisted judgment per text; a Phase 2 helper may standardize the
+  common cases.
 
 ## 2. Synthetic constructions (`constructions/`)
 
