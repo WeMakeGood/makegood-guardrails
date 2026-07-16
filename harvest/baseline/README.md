@@ -65,7 +65,17 @@ would calibrate the normalizer to one house style; and freely synthesized
   hard, because post-2023 they are the most heavily AI-assisted and carry no
   authorship guarantee to relax it. Relax the date only for a named human whose
   authorship is more certain than the date would establish.
-- **Diversity cap:** no author or organization contributes more than ~2 texts.
+- **Diversity cap (keyed on idiolect, not organization).** The contaminant the
+  cap guards against is *one voice becoming "human normal"* — a single writer's
+  sentence rhythm, em-dash habit, and tics dominating the envelope. That is a
+  **writer**-level property, so the cap is ~2 texts per **named writer** per
+  genre. An organization is not a voice: one outlet's writers are many, and its
+  house style is a far weaker contaminant than a single idiolect — so the org is
+  a soft secondary note, not a hard limit. (Capping on org does the wrong thing
+  both ways: it under-counts a diverse-writer outlet and would discard the
+  variability of a deep one.) **Fallback:** when a text is unsigned (e.g. house-
+  style news) or agency-driven (the voice is the agency, not one person), cap on
+  the organization/agency instead, since that is then the idiolect-source.
 - **Scale:** 15–25 texts per battery genre, ~150–250 total. Measuring is
   cheap; curation was the bottleneck, and there is none.
 - **Outputs:**

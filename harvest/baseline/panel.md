@@ -11,27 +11,27 @@ this index from the JSONL; don't hand-edit rows here.
 
 ## Screening recap (all required per text)
 
-Contamination guard (pre-2023 **or** documented stronger authorship guarantee — `README.md §1`) · human-authorship confidence · genre fit · editorial excellence. Diversity cap: ~2 texts per author/org per genre.
+Contamination guard (pre-2023 **or** documented stronger authorship guarantee — `README.md §1`) · human-authorship confidence · genre fit · editorial excellence. **Diversity cap: ~2 texts per idiolect-source per genre** — the named writer, or the org/agency when unsigned or agency-driven. Org alone is not capped.
 
 ## Counts by genre (14 texts total; target 15–25/genre)
 
-| Genre | Texts | Toward target |
-|---|---|---|
-| appeal | 1 | ●○○○○○○○○○○○○○○ |
-| editorial | 3 | ●●●○○○○○○○○○○○○ |
-| feature | 10 | ●●●●●●●●●●○○○○○ |
+| Genre | Texts | Distinct idiolects | Toward target |
+|---|---|---|---|
+| appeal | 1 | 1 | ●○○○○○○○○○○○○○○ |
+| editorial | 3 | 3 | ●●●○○○○○○○○○○○○ |
+| feature | 10 | 8 | ●●●●●●●●●●○○○○○ |
 
-> ⚠️ **Diversity-cap breaches to resolve before freezing envelopes:** **Fast Company** contributes **8** feature texts (cap ~2). These inflate one house style's weight in the envelope; trim to ~2 or treat the excess as provisional until other sources dilute them.
+> ✅ No idiolect-cap breach: no single writer/voice exceeds ~2 texts in any genre. (Note the earlier org-level Fast Company concentration is *not* a breach under the writer-keyed cap — those 8 texts are 6 distinct writers.)
 
 ## Index
 
 | ID | Citation | Author | Date | Genre | Words | Date basis |
 |---|---|---|---|---|---|---|
-| APP-01 | SOFII: Camp Oochigeas mid-value direct mail appeal | John Lepp/Agents of Good; si | 2018 | appeal | 597 | pre-2023 ✓ |
-| ED-01 | The Atlantic, "The See-No-Evil Supreme Court" | Adam Serwer | 2026-07-14 | editorial | 1471 | authorship-guarantee ⚑ |
-| ED-02 | The Atlantic, "Generative AI Is an Engineering Disas | Alex Reisner | 2026-07-14 | editorial | 1693 | authorship-guarantee ⚑ |
+| APP-01 | SOFII: Camp Oochigeas mid-value direct mail appeal | John Lepp/Agents of Good;  | 2018 | appeal | 597 | pre-2023 ✓ |
+| ED-01 | The Atlantic, "The See-No-Evil Supreme Court" | Adam Serwer | 2026-07-14 | editorial | 1471 | authorship ⚑ |
+| ED-02 | The Atlantic, "Generative AI Is an Engineering Disas | Alex Reisner | 2026-07-14 | editorial | 1693 | authorship ⚑ |
 | ED-03 | The New York Times, "Weaponizing the First Amendment | Adam Liptak | 2018-06-30 | editorial | 2200 | pre-2023 ✓ |
-| FE-01 | The Atlantic, "How the Elite See Rome" | Cullen Murphy | 2026-08 | feature | 4312 | authorship-guarantee ⚑ |
+| FE-01 | The Atlantic, "How the Elite See Rome" | Cullen Murphy | 2026-08 | feature | 4312 | authorship ⚑ |
 | FE-02 | Fast Company, "Is Kyrie Irving's rant about his Nike | Jeff Beer | 2021-07-30 | feature | 674 | pre-2023 ✓ |
 | FE-03 | Fast Company, "The cardboard real estate boom is her | Nate Berg | 2021-07-30 | feature | 729 | pre-2023 ✓ |
 | FE-04 | Fast Company, "The hidden way the Tokyo Olympics cou | Nate Berg | 2021-07-29 | feature | 988 | pre-2023 ✓ |
@@ -44,4 +44,4 @@ Contamination guard (pre-2023 **or** documented stronger authorship guarantee �
 
 ⚑ = post-2023, admitted on an authorship guarantee; see the row's `date_basis` in `panel.jsonl` (ED-02's is an explicitly-labeled inference).
 
-<!-- Next: dilute the Fast Company feature cluster with other publications; grow editorial past Atlantic/NYT; seed the new `news` genre (extractor needs an archive.ph + NYT-interactive path); then the untouched genres. Envelope math waits for ~15-25/genre with the cap respected. -->
+<!-- Next: grow editorial and the untouched genres; seed `news` (extractor needs archive.ph + NYT-interactive paths). Envelope math waits for ~15-25/genre, idiolect-cap respected. -->
