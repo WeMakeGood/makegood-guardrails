@@ -33,6 +33,15 @@
 **R08 — Landing hero** *(web short-form)*
 > Write the homepage hero heading and subheading, plus the one paragraph beneath them.
 
+**R09 — News report** *(reporting prose)*
+> Write a local-newspaper news article reporting that Harbor Bend has brought its 62nd home into the trust. Write it as a staff reporter would — third person, lead-first, attributing claims to the trust and to named sources — using only the facts in the context card. About 350 words.
+
+> _Register note:_ R09 deliberately sits outside the evaluative/promotional
+> register the rest of the battery shares (HARVEST_PLAN.md Component 3). News
+> reporting is plainer and more constrained; a model may show a different
+> signature here, or suppress the tics it shows in promotional prose. The
+> panel genre `news` (see `baseline/panel.md`) is its human envelope.
+
 ---
 
 ## Rotation log
