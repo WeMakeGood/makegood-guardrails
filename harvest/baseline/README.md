@@ -18,8 +18,9 @@ by definition and is regenerated. (HARVEST_PLAN.md, "Reference architecture.")
 
 ## 1. The identification panel (measure, never store)
 
-Real, editorially excellent, verifiably pre-2023 published writing, measured
-**in situ at natural length**. Every metric is length-normalized
+Real, editorially excellent published writing that clears the contamination
+guard (pre-2023 by default, or a documented stronger authorship guarantee —
+see Panel rules), measured **in situ at natural length**. Every metric is length-normalized
 (per-1,000-words and per-sentence rates), so an essay is measured at its
 full natural length and a bio at its natural 90 words — no excerpting, no
 fixed word-count bands, no anonymization, no stored text. Only derived
@@ -39,9 +40,31 @@ would calibrate the normalizer to one house style; and freely synthesized
   strongly edited editorial and feature writing, newspaper profile bios.
   Model proposes; operator vetoes/extends.
   <!-- TODO: collect Chris's suggested sources (writers, orgs, editors he trusts) before the first pass. -->
-- **Screening (all required per text):** verifiable pre-2023 publication;
-  human-authorship confidence; genre fit; editorial excellence (the text
-  would pass S0's gates — earned claims, point-first, medium's shape).
+- **Screening (all required per text):** human-authorship confidence; genre
+  fit; editorial excellence (the text would pass S0's gates — earned claims,
+  point-first, medium's shape); **and the contamination guard below.**
+- **Contamination guard (the date is a proxy, authorship is the target).** The
+  panel exists to measure *human* density; the risk is model-inflected writing
+  poisoning the pool. The pre-2023 date is a cheap, conservative proxy for "a
+  human wrote this, not an LLM" — 2023 being when LLM-assisted writing went
+  mainstream. A text clears the guard when **either** holds, recorded per text
+  in `panel.md`:
+  1. **Verifiable pre-2023 publication** (the default proxy), **or**
+  2. **A documented stronger authorship guarantee** than the date provides —
+     a closed corpus, a deceased author, a verifiable pre-2023 print origin
+     read later, or a named individual author whose circumstances make LLM
+     drafting implausible. Weaker per-author inferences (e.g. "writes
+     critically about AI") are admissible **only when labeled as inference,
+     not verified**, so a re-derivation sees the assumption rather than
+     inheriting it silently.
+
+  Two things are **not** sufficient on their own: a publisher's stated LLM
+  policy (institutional, unverifiable per-article, doesn't bind freelancers or
+  quoted text), and any institutional/anonymous copy without a byline
+  (about pages, FAQs, marketing, reports) — for these the date proxy stays
+  hard, because post-2023 they are the most heavily AI-assisted and carry no
+  authorship guarantee to relax it. Relax the date only for a named human whose
+  authorship is more certain than the date would establish.
 - **Diversity cap:** no author or organization contributes more than ~2 texts.
 - **Scale:** 15–25 texts per battery genre, ~150–250 total. Measuring is
   cheap; curation was the bottleneck, and there is none.
