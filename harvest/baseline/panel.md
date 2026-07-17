@@ -8,8 +8,9 @@ publication metadata, the prose-boundary note, and the numbers.
 **Role (working design):** the panel is **not** the baseline. It is (1) the
 craft-study input the exemplar generator reads to write craft-strong exemplars,
 and (2) the real-writing reference a discovered candidate is grounding-checked
-against. The frozen synthetic baseline lives in `exemplars/`. See
-`README.md §2`. Regenerate this index from the JSONL; don't hand-edit rows here.
+against. The synthetic exemplar reference lives in `exemplars/` (being rebuilt
+against the new battery — see `../battery/COVERAGE_SPEC.md`). Regenerate this
+index from the JSONL; don't hand-edit rows here.
 
 **Pass version:** `2026-07` (in progress). Measured with `measure_density.py` v0.1.0.
 

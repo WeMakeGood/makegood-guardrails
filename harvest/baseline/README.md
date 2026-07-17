@@ -1,6 +1,15 @@
 # Reference Layer — Synthetic Baseline + Differential Testing
 
-**Status: the synthetic reference set is built, approved, and frozen (`exemplars/`). The tic-finder (`../scripts/tic_finder.py`) runs against it. The blind-judge leg is not yet built (see `../ROADMAP.md`).**
+> **STATUS (2026-07-17): NOT frozen, NOT approved. The battery this reference
+> matched was retired.** The original single-org (Harbor Bend) promotional
+> battery and its 12 exemplars were deleted — that battery could only surface
+> tics within one narrow genre. The reference layer is being rebuilt against the
+> new battery in [`../battery/COVERAGE_SPEC.md`](../battery/COVERAGE_SPEC.md)
+> (domain/register coverage, no fixed substrate, stable-core + growing-pool).
+> The blind-judge leg (`../scripts/run_judge.py`) **is** built and verified.
+> Everything below describes the retired design and will be rewritten once the
+> new briefs exist — read it as history, not current state. See
+> `[[harvest-battery-purpose]]`.
 
 **Purpose (stated first — getting it wrong invalidated three earlier designs):** this layer exists to make *currently unidentified* tics discoverable in a new model's writing. It is not a known-tic scoreboard. The known-tic counter (`measure_density.py`) lives here only as a regression suite for existing backstop entries.
 

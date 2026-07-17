@@ -12,12 +12,17 @@ saved sources ─ scan_sources.py ─▶ triage      (metadata present? guard cl
      └─ extract_body.py ─▶ prose bodies         (strip nav/ads/scaffolding)
                               │
         target model output ──┴──▶ tic_finder.py ──▶ ranked candidate tics   (4a: DISCOVERY)
-                                   measure_density.py ─▶ known-tic regression (4b: CONFIRM/RETIRE)
+                              │    measure_density.py ─▶ known-tic regression (4b: CONFIRM/RETIRE)
+                              └──▶ run_judge.py ──▶ differential-reading tally (5:  BLIND JUDGE)
 ```
+
+Two independent detector families — the statistical diff (4a/4b) and the blind
+judge (5) — corroborate at compile time; agreement between them is the strongest
+admission signal.
 
 ## tic_finder.py — the discovery instrument (Component 4a)
 
-Diffs a target model's writing against the frozen task-matched exemplar and
+Diffs a target model's writing against the task-matched exemplar and
 ranks the features the target **over-represents** (log-odds keyness: words,
 n-grams, punctuation, sentence openings, sentence shapes). **No predefined tic
 list** — an unnamed tic can surface. This is the tool that answers the whole
@@ -34,6 +39,40 @@ Output is **candidates, not verdicts.** Content-word hits are noise; a human
 names the structural/stylistic candidates and grounding-checks them against real
 writing before anything reaches the backstop. Single short pairs are
 underpowered — pool.
+
+## run_judge.py — blind-judge leg (Component 5)
+
+The **second, independent detector.** Where `tic_finder.py` ranks features a
+target over-represents against a reference distribution, the judge reads two
+concrete passages side by side and enumerates *how* they differ. It works at any
+N (no pooled corpus needed), catches pattern-level tics no regex can rank, and
+covers `tic_finder.py`'s blind spot — a tic **shared** by the exemplar generator
+and the target cancels out of the keyness diff but still shows up to a judge that
+never sees the reference distribution.
+
+Three subcommands, one packet format, one judgment schema:
+
+```
+# 1. Build blinded packets (A/B randomized, provenance stripped) + sealed key.json
+scripts/run_judge.py prepare --target-dir OUTPUTS/ \
+    --exemplar-dir baseline/exemplars --out reports/<id>/judgments
+
+# 2. The judge (different-generation model, fresh context per pair) writes
+#    pair-<pid>.json per the schema printed in each packet. OR, optionally:
+scripts/run_judge.py dispatch --judgments reports/<id>/judgments \
+    --judge-model <different-generation model>   # needs `anthropic` SDK + a key
+
+# 3. Resolve the blinding, cluster, and report candidates
+scripts/run_judge.py tally --judgments reports/<id>/judgments
+```
+
+`prepare` and `tally` are offline stdlib-only like the rest. `dispatch` is the
+one optional path that imports `anthropic` and touches the network — the offline
+flow is complete without it. Blindness is structural: the A/B→target/exemplar
+map is sealed in `key.json`, which the judge never reads and only `tally` opens.
+**Target-side recurrences (≥3 pairs) are candidates; exemplar-side recurrences
+are never dropped** — they route to the exemplar re-approval queue. Candidates,
+not verdicts — corroborate against `tic_finder.py` before admission.
 
 ## measure_density.py — known-tic regression (Component 4b)
 
