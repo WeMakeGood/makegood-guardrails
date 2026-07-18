@@ -91,15 +91,16 @@ significance note to `tic_finder.py` so weak hits read as weak.
 **Done when:** arm-A-vs-arm-B shows S0's current gate effectiveness, and weak
 `tic_finder` hits are visibly flagged.
 
-### 3. Close the doc/spec reconciliation — coordination debt
+### 3. Merge the branch to main — the only remaining coordination debt
 
-**Why.** This session's working design simplified the design session's v4. Docs
-were updated to match (2026-07-16), but the two sessions should confirm the
-merged design together, and the branch `harvest/measurement-tool` is not yet
-merged to main.
+**Why.** The doc set is reconciled (2026-07-18: `HARVEST_PLAN.md`, `HARVEST.md`,
+`baseline/README.md`, `COVERAGE_SPEC.md` all agree with the committed state).
+There is no longer a separate design session to confirm a merged design with —
+one owner drives design + tooling now. What remains is a decision, not a
+reconciliation: the branch `harvest/measurement-tool` is not yet merged to main.
 
-**Do:** design + tooling sessions confirm the working design; decide the branch
-merge; ensure `HARVEST_PLAN.md`, `HARVEST.md`, `baseline/README.md` agree.
+**Do:** decide and execute the merge of `harvest/measurement-tool` to main
+(Chris's call).
 
 ### 4. First real harvest → replace provisional backstop entries
 
