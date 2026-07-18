@@ -30,7 +30,7 @@ project's question: *what does this new model overdo?*
 
 ```
 # one pair
-scripts/tic_finder.py --target OUT.md --exemplar baseline/exemplars/F03/exemplar.md
+scripts/tic_finder.py --target OUT.md --exemplar baseline/exemplars/AN04/exemplar.md
 # pooled across all briefs (where the signal reaches significance)
 scripts/tic_finder.py --target-dir OUTPUTS/ --exemplar-dir baseline/exemplars/ --pooled
 ```

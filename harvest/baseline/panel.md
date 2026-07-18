@@ -6,11 +6,12 @@ by `measure_density.py`). **No source text is stored** — only citation,
 publication metadata, the prose-boundary note, and the numbers.
 
 **Role (working design):** the panel is **not** the baseline. It is (1) the
-craft-study input the exemplar generator reads to write craft-strong exemplars,
+craft-study input (the current v2 exemplars studied the broader `sources/` corpus;
+this 14-text panel was the earlier craft set and remains a grounding reference),
 and (2) the real-writing reference a discovered candidate is grounding-checked
-against. The synthetic exemplar reference lives in `exemplars/` (being rebuilt
-against the new battery — see `../battery/COVERAGE_SPEC.md`). Regenerate this
-index from the JSONL; don't hand-edit rows here.
+against. The synthetic exemplar reference lives in `exemplars/` (31 committed,
+one per brief in `../battery/core.jsonl` — see `../battery/COVERAGE_SPEC.md`).
+Regenerate this index from the JSONL; don't hand-edit rows here.
 
 **Pass version:** `2026-07` (in progress). Measured with `measure_density.py` v0.1.0.
 

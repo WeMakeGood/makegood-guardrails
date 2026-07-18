@@ -1,10 +1,10 @@
-# Battery Briefs — DRAFT for review (not approved)
+# Battery Briefs — readable view
 
-> **Status: draft, 2026-07-17.** Written to
-> [`COVERAGE_SPEC.md`](COVERAGE_SPEC.md). Replaces the retired Harbor Bend F01–F12.
-> Nothing here is approved; nothing runs off these until you sign off. Exemplars
-> are regenerated (Fable, broad-craft-sourced, guardrail-free) only after brief
-> approval.
+> **Status: approved + committed (2026-07-18).** Human-readable companion to
+> [`core.jsonl`](core.jsonl), which is the **source of truth** — if the two ever
+> disagree, `core.jsonl` wins. Written to [`COVERAGE_SPEC.md`](COVERAGE_SPEC.md);
+> replaced the retired Harbor Bend F01–F12. All 31 briefs have committed exemplars
+> (Fable, broad-craft-sourced, guardrail-free, `v2-learn-decisions`).
 
 ## How to read a brief
 

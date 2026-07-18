@@ -1,10 +1,13 @@
-# Battery Coverage Spec — PROPOSAL (not approved)
+# Battery Coverage Spec
 
-> **Status: draft for review, 2026-07-17.** Replaces the frozen 12 Harbor Bend
-> briefs (F01–F12), which were built from the wrong question ("what does Make
-> Good do / how does a nonprofit write") and could only surface tics that
-> manifest in nonprofit-promotional prose. Nothing here is approved. See
-> `[[harvest-battery-purpose]]` for the corrected intent.
+> **Status: approved in principle; briefs written + committed (2026-07-18).** The
+> 31 briefs are in [`core.jsonl`](core.jsonl) (source of truth) and all 31 have
+> committed exemplars. This spec is the design behind them. Replaced the frozen 12
+> Harbor Bend briefs (F01–F12), which were built from the wrong question ("what
+> does Make Good do / how does a nonprofit write") and could only surface tics
+> that manifest in nonprofit-promotional prose. The battery is a stable core +
+> growing pool — this spec evolves as registers/briefs are added. See
+> `[[harvest-battery-purpose]]` for the intent.
 
 ## What the battery is for
 
@@ -111,9 +114,15 @@ Anywhere a tradeoff pits quality against economy, quality wins. Do not offer
   model, clustering method + stability, and the resulting candidate → S0 entry
   decisions. A finding must be auditable and two harvests comparable.
 
-## Not in this spec (deliberately)
+## Downstream work — status (updated 2026-07-18)
 
-- The actual brief text (write after the design is approved).
-- The exemplar regeneration (follows brief approval; runs the Fable sessions).
-- `run_judge.py` changes for multi-sample + clustering stability (real work,
-  scoped once the battery shape is set).
+- **Brief text — DONE.** All 31 briefs written and committed in
+  [`core.jsonl`](core.jsonl) (source of truth); `BRIEFS_DRAFT.md` is the readable draft.
+- **Exemplar regeneration — DONE.** 31 exemplars committed at
+  `../baseline/exemplars/<ID>/` with provenance, generated `v2-learn-decisions`.
+  See `[[harvest-exemplar-learning-instruction]]`.
+- **`run_judge.py` multi-sample — DONE (0.2.0).** N samples per brief + two-level
+  recurrence (a tic must recur across samples of a brief AND across briefs).
+- **Still open:** clustering-stability (consensus over repeated runs / variance as
+  a range); arm-A-vs-arm-B gate-effectiveness wiring; the first real judge run.
+  See `../ROADMAP.md`.

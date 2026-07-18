@@ -1,6 +1,15 @@
 # Prose-Signature Harvest — Design Plan
 
-*Drafted 2026-07-15. Status: proposal for review (Chris). Nothing in this plan has been built.*
+*Drafted 2026-07-15. Design rationale for the harvest. Substantial parts are now
+built (as of 2026-07-18): the replacement battery (`harvest/battery/core.jsonl`,
+31 briefs / 8 registers), all 31 exemplars (`harvest/baseline/exemplars/`), the
+blind judge (`harvest/scripts/run_judge.py`, primary detector, multi-sample +
+two-level recurrence), `tic_finder.py`, and intake tooling. The current build
+state and priorities live in [`harvest/ROADMAP.md`](harvest/ROADMAP.md); the
+operator runbook in [`harvest/HARVEST.md`](harvest/HARVEST.md). Two design points
+below were superseded by decisions on 2026-07-17/18 and are flagged inline: the
+battery is now a **growing pool, not frozen**, and the judge is chosen as the
+**most capable analytic model**, not merely a different generation.*
 
 ---
 
@@ -21,7 +30,7 @@ The fix is to stop authoring the list and start **measuring** it: generate outpu
 - **Discovery over confirmation.** The instrument must be able to surface a pattern nobody has named yet. Closed metric sets are regression suites for *known* entries; discovery runs on open feature spaces (distributional diffs) and open questions (differential reading) against a testable standard. Any layer that can only confirm what's already named must never be the headline.
 - **Thresholds, not bans.** Most tics are legitimate techniques at human density — em-dashes and the rule of three are classical rhetoric. The machine signature is *overuse*. Backstop entries encode density thresholds relative to a human baseline, never absolute prohibitions.
 - **Evidence earns a slot.** A pattern enters the backstop only when flagged by at least two of the three detectors (statistical, judge, external). A pattern with no observed leakage across two consecutive harvests is retired. The list can shrink.
-- **The battery is frozen; the models change.** A fixed prompt core makes harvests comparable across model generations — the longitudinal signal is the point. A small rotating minority guards against overfitting the gates to the battery.
+- **Stable core + growing pool; the models change.** *(Revised 2026-07-17 — superseded the original "the battery is frozen.")* A stable brief core makes harvests comparable across model generations — the longitudinal signal is the point. But the battery is designed to **grow**: registers and briefs are added as coverage gaps surface, because a discovery instrument for tics we can't yet name needs room for an unknown tic to appear. Freezing optimizes for regression (watch a known tic move against fixed inputs) — the opposite of discovery. Regression tracking of known tics is a separate, smaller concern. See `[[harvest-battery-purpose]]`.
 - **The reference numbers come from pre-2023 human writing.** Human writing is increasingly model-inflected, so the identification panel measures only verifiably pre-2023 published texts. The panel is measure-and-cite (no text stored); re-deriving the envelope is a versioned event, never a silent drift.
 - **Distribution rides the existing lock pipeline.** The backstop is an independently versioned artifact in this repo, pinned via `guardrails.lock`, vendored by `--resolve-guardrails`. Libraries adopt updates by deliberate bump, exactly like F0/S0 today. No runtime lookup, ever — always-load content is in the system prompt from turn one, per the delivery principle in the skill's ARCHITECTURE.md.
 - **Human review is non-negotiable.** The harvest proposes; a human disposes. A fully automated list would let one anomalous run ban ordinary English.
@@ -114,28 +123,32 @@ makegood-guardrails/
   harvest/
     HARVEST.md                              (the runbook — protocol below)
     battery/
-      context-card.md                       (fictional-org facts, frozen)
-      core.md                               (F01–F12, frozen)
-      rotating.md                           (R-pool; 4 selected per harvest)
+      core.jsonl                            (31 briefs / 8 registers; [invented]/[real] tagged; stable core + growing pool)
+      COVERAGE_SPEC.md                      (battery design: registers, tagging, growth)
+      BRIEFS_DRAFT.md                       (human-readable draft of the briefs)
     baseline/
       README.md                             (reference-layer spec + rules)
-      exemplars/                            (THE BASELINE: per-brief synthetic exemplars, frozen + human-approved)
+      exemplars/                            (THE REFERENCE: per-brief synthetic exemplars, versioned + re-approved)
         README.md                           (exemplar provenance + generation rules)
-        F01/ … F12/exemplar.md              (one craft-strong exemplar per core brief)
+        <ID>/exemplar.md + provenance.json  (one craft-strong exemplar per brief; 31 committed)
       panel.jsonl                           (human-writing ledger: citations + per-text stats; craft-study input + grounding, NOT the baseline)
       panel.md                              (human-readable panel view)
       metrics-baseline.json                 (known-tic envelopes — regression reference only, never the discovery instrument) [when needed]
-      craft/                                (OPTIONAL/future: per-genre craft profiles — roadmap enrichment)
-      fingerprints/                         (OPTIONAL/future: per-genre aggregate distributions — second discovery reference)
-      constructions/                        (when regression-checking known entries)
+      craft/                                (OPTIONAL/future: per-genre craft profiles — roadmap enrichment; empty stub)
+      fingerprints/                         (OPTIONAL/future: per-genre aggregate distributions — second discovery reference; empty stub)
+      constructions/                        (when regression-checking known entries; empty stub)
         positive/                           (inside envelope — regression metrics must NOT fire)
         negative/                           (tic-maximal — regression metrics MUST fire)
     scripts/
-      tic_finder.py                         (open discovery diff — Component 4a; the discovery instrument)
+      run_judge.py                          (blind judge — Component 5; PRIMARY detector; multi-sample + two-level recurrence)
+      tic_finder.py                         (open discovery diff — Component 4a; backward-looking secondary)
       measure_density.py                    (known-tic regression counter — Component 4b)
+      promote_exemplars.py                  (promote staged exemplars → baseline/exemplars/ + provenance)
       extract_body.py                       (prose-boundary preprocessing)
       scan_sources.py                       (panel source-drop triage)
-    ROADMAP.md                              (what's built, what's next: blind judge, scale, enrichment)
+      build_sources.py / recover_failures.py (rebuild the sources/ craft corpus)
+    ROADMAP.md                              (what's built, what's next: first judge run, scale, enrichment)
+  sources/                                  (gitignored craft corpus Fable studies; rebuildable)
     reports/
       2026-07-sonnet-5/                     (one directory per harvest)
         outputs/                            (raw generations, both arms)
@@ -145,7 +158,7 @@ makegood-guardrails/
         REPORT.md                           (the operator-facing report)
 ```
 
-### Reference architecture: frozen synthetic baseline → differential testing (working design, settled 2026-07-16)
+### Reference architecture: synthetic exemplar reference → differential testing (working design; battery replaced 2026-07-17, exemplars committed 2026-07-18)
 
 **The purpose, stated first because getting it wrong invalidated three designs:** the reference layer must make it possible to identify problems that appear in *later* models — patterns nobody has named yet — and to test for them reproducibly. A closed set of known-tic metrics can only re-measure what's already named; a baseline expressed as tic-count envelopes is the stale-recollection failure mode wearing a quantitative costume. Four rejected designs:
 
@@ -156,19 +169,19 @@ makegood-guardrails/
 
 A fifth design (the "v4" three-layer plan: collected panel → craft profiles + fingerprints → exemplars → differential testing) was **correct but heavier than needed.** In practice the collect/screen/discard corpus work was the bottleneck and wasn't required to reach the goal. The **working design** keeps v4's principle (*discovery over confirmation*) and its invariants, and simplifies the machinery: the synthetic exemplars **are** the baseline; the human panel is craft-input + grounding, not a required product pipeline.
 
-**The baseline — a frozen synthetic reference set.** For every battery brief, a craft-strong **exemplar** (`baseline/exemplars/<prompt-id>/exemplar.md`), written to the *same context card and same brief* the battery uses. Task-matching is the property only synthesis provides and the reason this works — a real feature can never be about Harbor Bend, so a diff against real text is confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. Generation rules (full detail in `baseline/exemplars/README.md`): **different model generation** than the targets (the cross-generation guard); **no S0/F0/backstop/tic-list** in the generator's context (sourcing the reference with our tic theory would re-close the discovery loop); **craft-sourced** (the generator studies real human writing, then writes in its own voice); **human-approved once**, then frozen and reused; regeneration is a versioned re-approval event. Economical (no collection treadmill), repeatable (one fixed yardstick across models over time), task-matched.
+**The reference — a synthetic exemplar set (the quality bar).** For every battery brief, a craft-strong **exemplar** (`baseline/exemplars/<ID>/exemplar.md`), written to the *same brief* (and substrate, where the register has one) the battery uses. Task-matching is the property only synthesis provides and the reason this works — a diff against real text is confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. The exemplar is the human-grade **quality bar**: what the best available model produces disposed to write like the skilled humans in the craft corpus. Generation rules (full detail in `baseline/exemplars/README.md`): **different model generation** than the targets (the cross-generation guard); **no S0/F0/backstop/tic-list** in the generator's context (sourcing the reference with our tic theory would re-close the discovery loop); **craft-sourced via `v2-learn-decisions`** (the generator learns the *decisions* behind the `sources/` corpus rather than imitating voice — reaches sub-tone mechanics a "write like this" prompt misses); **versioned + re-approved**, not frozen-forever. Economical (no collection treadmill), repeatable (one task-matched yardstick per brief across models over time). 31 exemplars committed 2026-07-18. See `[[harvest-exemplar-learning-instruction]]`.
 
 **The human panel — craft input + grounding, not the baseline.** The measured human texts (`panel.jsonl`) are what the generator *studies* to write craft-strong exemplars, and the reference a discovered candidate is grounding-checked against. It never grows on a schedule; it is enrichment, not a harvest blocker.
 
 **Differential testing (the discovery engine).** Same brief, model output vs. exemplar:
 
 - **Open statistical diff (`scripts/tic_finder.py`, Component 4a):** pooled arm-B outputs vs. pooled exemplars, ranked by log-odds over-representation (words, n-grams, punctuation, sentence openings, sentence shapes). No pre-named columns; a new tic surfaces as an over-representation. *Proven:* Opus-4.8 arm-A × 12 briefs pooled surfaced dash-overuse, spaced-dash, colon-led elaboration, and formulaic openings — known current-gen syntactic tics, discovered not recalled.
-- **Holistic judge diff (Component 5, planned):** the judge reads both responses to the same brief and enumerates every systematic difference in *how* they are written — not "which is the machine." Finds tics at any N (no pooling needed). Not yet built — see `harvest/ROADMAP.md`.
+- **Holistic judge diff (`scripts/run_judge.py`, Component 5 — the PRIMARY detector):** the judge reads both responses to the same brief and enumerates every systematic difference in *how* they are written — not "which is the machine." Finds tics at any N (no pooling needed). Built and verified; supports multiple samples per brief with two-level recurrence (a tic must recur across samples of a brief AND across briefs). It is now the headline detector; `tic_finder.py` is a backward-looking secondary cross-check.
 - **Known-tic regression (`scripts/measure_density.py`, Component 4b):** the named metrics, run against outputs and (when present) envelopes to confirm/retire current backstop entries.
 
 **Grounding invariant:** real writing remains the arbiter. A candidate from any diff enters `candidates.md` only after a **confirmation check against real writing** — if the pattern occurs at comparable rates in excellent human prose (the panel, optional fingerprints, or a fresh check), it is craft, not tic. Synthetic exemplars are the *instrument* of comparison, never the *authority* for what counts as human.
 
-**Named blind spot:** a tic shared by the exemplar generator and the target cancels out of the task-matched diff. Craft-sourcing raises this risk (it made exemplars more stylistically assertive — moves AI overuses). Coverage: the planned blind-judge leg (never sees the reference), the external-signal detector (Component 6), the cross-generation guard, and grounding against real writing. **Optional future enrichment** (`baseline/fingerprints/`, `baseline/craft/`) would add a second, real-writing diff reference immune to exemplar-generator contamination; on the roadmap, not the critical path.
+**Named blind spot (measured + mitigated 2026-07-18):** a tic shared by the exemplar generator and the target cancels out of the task-matched diff. This was measured, not just feared — the v1 exemplars carried an em-dash tic at 2.94/250w against a human-corpus baseline of 0.67. The `v2-learn-decisions` generation instruction cut it to 1.35/250w without naming any tic. Residual risk persists at the punctuation level (still above human), so for punctuation-level tics use the `sources/` human corpus as the baseline, not the exemplars, and always run the human corpus as a control before treating a raw count as a finding. Coverage: the blind judge (never sees provenance), the external-signal detector (Component 6), the cross-generation guard, and grounding against real writing. **Optional future enrichment** (`baseline/fingerprints/`, `baseline/craft/`) would add a second, real-writing diff reference immune to exemplar-generator contamination; on the roadmap, not the critical path.
 
 ---
 
@@ -178,41 +191,48 @@ A fifth design (the "v4" three-layer plan: collected panel → craft profiles + 
 
 Every prompt runs against **each model in the current deployment-target set**, in **two arms**:
 
+Each brief carries its own prompt and, where the register needs it, its own
+substrate (in `core.jsonl`); there is no single shared fixed context card.
+
 | Arm | System prompt | Purpose |
 |---|---|---|
-| **A — control** | Context card only, no S0 | Measures the raw signature; also the denominator for gate effectiveness |
-| **B — gates-only** | Context card + S0 core (no backstop) | The primary corpus: what leaks through the gates is the backstop's job |
+| **A — control** | no guardrail modules (brief + its own substrate only) | Measures the raw signature; also the denominator for gate effectiveness |
+| **B — gates-only** | S0 core (no backstop) | The primary corpus: what leaks through the gates is the backstop's job |
 
 Same harness, same order, fresh context per prompt. Arm B minus arm A is the **gate-effectiveness** measure — a free health check on S0 core itself. If a tic is equally dense in both arms, the gates never touched it; if the gates suppress it, it may not need a backstop entry at all.
 
-### Context card (frozen, in `battery/context-card.md`)
+> **Superseded 2026-07-17.** The original v1 battery — a frozen single-org
+> promotional set (Harbor Bend Community Land Trust context card + 12 prompts
+> F01–F12, all one org, all evaluative/promotional register) — was **retired.**
+> A single org in one register can only surface tics *within that genre*, and the
+> first real run confirmed it: the top non-known "discoveries" were donor-appeal
+> genre artifacts, not model tics. The current battery organizes by
+> **domain/register** instead, so the register is the stimulus and the judge names
+> whatever the model overdoes. The subsections below are kept only as the record of
+> what was replaced and why; the live battery spec is authoritative.
 
-A one-page fact sheet for a fictional organization — **Harbor Bend Community Land Trust** (community land trust, founded 2011, 3 staff + 40 volunteers, 62 permanently affordable homes stewarded, a youth-stewardship program, a modest verified outcome set: resident tenure lengths, resale-formula outcomes, one program that was paused and why). The card exists so outputs have real facts to work with — which also exercises the Earn Every Claim gate honestly. All numbers are invented once and frozen; comparability requires the card never change.
+**The current battery** (source of truth: `battery/core.jsonl`; design:
+`battery/COVERAGE_SPEC.md`): 31 briefs across **8 registers** — analytical,
+technical, narrative, news, terse, correspondence, reasoning, adversarial. Every
+brief is tagged `[invented]` (writing-without-priors) or `[real]` (writing-with-
+priors / trained-data recall), and carries its own prompt plus, where the register
+needs one, its own substrate — there is no single shared context card. It is a
+**stable core + growing pool**: the core recurs every harvest for longitudinal
+comparability, and registers/briefs are added as coverage gaps surface (a
+discovery instrument needs room for an unnamed tic to appear). Multiple samples
+per brief per arm (default 3) so a tic must recur across samples, not just briefs.
 
-### Fixed core — F01–F12 (frozen)
+<details><summary>Retired v1 battery (Harbor Bend F01–F12) — historical record</summary>
 
-Genres chosen because they reliably elicit evaluative/promotional prose — the tic-richest register:
+The v1 battery was a one-page fact sheet for a fictional **Harbor Bend Community
+Land Trust** plus 12 frozen prompts (About page, case study, donor appeal,
+newsletter, blog opening, board comparison, exec summary, program page, LinkedIn
+post, bio, FAQ, partner email) and a rotating pool (event invitation, op-ed, grant
+narrative, etc.). All one org, all promotional register. Retired because that
+scope structurally cannot distinguish a model tic from a genre convention. See
+`[[harvest-battery-purpose]]`.
 
-| ID | Genre | Format target | Prompt (abbreviated; full text in `battery/core.md`) |
-|---|---|---|---|
-| F01 | About page | Web prose | "Write the About page for Harbor Bend's website. ~350 words." |
-| F02 | Case study | Long-form prose | "Write a case study on the Alder Street acquisition using the facts in the context card. ~600 words." |
-| F03 | Donor appeal | Letter | "Write the year-end donor appeal letter from the executive director. ~400 words." |
-| F04 | Newsletter lead | Email prose | "Write the lead article for the quarterly newsletter covering the youth-stewardship program's second cohort. ~350 words." |
-| F05 | Blog opening | Editorial prose | "Write the first 300 words of a blog post arguing that permanent affordability beats subsidized rent. For a general audience." |
-| F06 | Comparison | Analytical prose | "Write a passage for the board comparing the resale-formula model with deed-restriction-only approaches. ~400 words." |
-| F07 | Executive summary | Report prose | "Write the executive summary of Harbor Bend's annual report. ~300 words." |
-| F08 | Program page | Web prose | "Write the program page for the youth-stewardship program. ~300 words." |
-| F09 | LinkedIn post | Social | "Write a LinkedIn post announcing the 62nd home entering the trust. ~150 words." |
-| F10 | Bio | Short-form | "Write a 150-word bio for the founding director for a conference program." |
-| F11 | FAQ | Q&A prose | "Answer these three FAQ questions for the website: How is this different from a co-op? What happens when I sell? Who qualifies?" |
-| F12 | Partner email | Correspondence | "Write an email to a prospective funder introducing Harbor Bend and requesting a meeting. ~250 words." |
-
-### Rotating pool — R01+ (4 per harvest, rotated)
-
-Event invitation; op-ed opening; grant-narrative excerpt; volunteer recruitment page; response statement to critical local-press coverage; podcast episode description; impact-report narrative section; landing-page hero + subhead. New pool prompts may be added over time; **the core is frozen** — longitudinal comparability lives there.
-
-**Battery size per harvest:** 16 prompts × 2 arms × N target models. At ~500 words average output this is a trivially cheap generation job; the cost center is review time, not tokens.
+</details>
 
 ---
 
@@ -257,7 +277,7 @@ The named metrics below, measured per output against the per-genre envelopes in 
 The open *qualitative* detector — catches pattern-level differences neither statistical layer can represent (structural moves, emphasis habits, how evidence is deployed).
 
 - **Pairing.** Each arm-B output is paired with the **exemplar for the same battery prompt** (`baseline/exemplars/<prompt-id>/`). Same brief, same facts — the comparison is purely about the writing.
-- **Judge.** A model from a *different generation* than both the harvest target and the exemplar generator, fresh context, no S0 loaded. (TODO: pick per harvest; record in the report.)
+- **Judge.** The **most capable analytic model available** at harvest time, chosen on merit (the judge does hard analytic work) — *not* selected merely for being a different generation. *(Revised 2026-07-17 — superseded the earlier "different generation than target and exemplar generator" framing.)* Fresh context per pair, no S0 loaded. No "latest" alias exists — record the pinned model id in the report; if the judge equals the target model, note that overlap as a weaker independent check.
 - **Presentation.** Randomized A/B order, no provenance metadata; the judge is not told which is which.
 - **Judge prompt (template):**
 
@@ -367,13 +387,13 @@ A recurring agentic run (scheduled agent or skill invocation) that executes batt
 | Exemplars drifting into authority over what counts as human | Grounding invariant: every discovered candidate is confirmed against real examples before admission; exemplars are the comparison instrument, never the arbiter |
 | Shared tics between exemplar generator and target cancel out of the task-matched diff | Fingerprint-level diff against real writing + external signal + cross-generation exemplar production; exemplar-side judge findings reviewed, never dropped |
 | Discovery layer quietly regressing into a fixed metric list | "Discovery over confirmation" principle: 4a runs on open feature spaces; named metrics live only in 4b as regression |
-| Battery overfit (gates/backstop tuned to the bait) | Frozen core for comparability + rotating minority for coverage; genres, not phrasings, are what the battery fixes |
+| Battery overfit (gates/backstop tuned to the bait) | Stable core for comparability + growing pool for coverage; registers, not phrasings, are what the battery fixes — the register is the stimulus, the judge names the tic |
 | Banlist growth outlawing ordinary English | 25-entry/~700-token cap; threshold phrasing; evidence admission rule; retirement rule; human review |
 | Judge shares generator's blindness | Cross-generation judging + the statistical layer (which has no blindness) + external signal |
 | Provisional Phase-0 entries treated as measured | Explicitly marked provisional in the backstop until first harvest confirms |
 | Stale libraries never adopt updates | `--check` upstream-newer notice; adoption stays deliberate per pinning philosophy |
 | Scope creep into general model evals | Harvest contract is prose signature only; behavioral evals (the skill-audit K-5 item) are a separate artifact that may share the harness later |
-| Fictional-org facts drift | Context card frozen; any change is a battery major version and breaks trend comparability — don't |
+| `[real]`-brief facts drift or provoke hallucination | Exemplars fact-verified before promotion; the judge is form-only by design (a hallucination leaves a stylistic fingerprint the judge catches without fact-checking) — see `[[harvest-battery-purpose]]` |
 
 ---
 
