@@ -1,0 +1,15 @@
+{
+  "id": "AN05",
+  "register": "R-ANALYTIC",
+  "substrate_kind": "real",
+  "brief_prompt": "Write a roughly 400-word critical assessment of why Betamax lost to VHS, arguing what the decisive factor actually was.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "17290922be096766e0c2b1c49ef0911fe408e45d8c138c9a5b85fbf28cef79b7",
+  "word_count": 431,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

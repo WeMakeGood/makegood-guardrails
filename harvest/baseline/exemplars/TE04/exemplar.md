@@ -1,0 +1,9 @@
+Your immune system learns the way a good bouncer does: by faces. It keeps a mental file of trouble it has seen before, and when a known troublemaker turns up, it acts fast and without hesitation. The problem is that some of the worst troublemakers only introduce themselves once—during an infection that might already be doing serious harm by the time the system recognizes them. A vaccine solves this by arranging the introduction in advance, under controlled conditions, with none of the danger.
+
+Here is what actually happens. A vaccine shows your body a harmless preview of a germ. Sometimes that preview is a weakened or dead version of the germ itself; sometimes it is just one distinctive piece, a protein from the germ's surface. Many newer vaccines don't even deliver the piece directly—they deliver instructions, and your own cells build the protein for a short while and then stop. However it arrives, the preview carries the germ's telltale shape without any of its ability to make you sick.
+
+Your immune system does not know the germ is harmless. It treats the preview as a genuine intruder and mounts a full response. Cells swarm the site, study the shape, and begin manufacturing antibodies—molecules built to lock onto that exact shape and mark it for destruction. This first response is slow and a little clumsy, the way a first attempt at anything is.
+
+The clumsiness is not a flaw. It is the point. When the danger passes, most of those cells die off, but a few remain as memory cells, holding the shape on file. If the real germ ever shows up, the file is already open. The response that took days the first time now takes hours, and the germ is often destroyed before you notice a thing.
+
+This is why a vaccine can feel like a mild illness for a day. That ache is the rehearsal, not the performance. You are watching your immune system learn a face it hopes never to need—and quietly deciding it will never be surprised by that one again.

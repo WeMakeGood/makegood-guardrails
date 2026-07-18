@@ -38,9 +38,12 @@ tics. `tic_finder.py` (keyness diff) is backward-looking and secondary.
 - **`harvest/battery/core.jsonl`** — the 31 approved briefs (source of truth;
   JSONL, one record per brief). `BRIEFS_DRAFT.md` is the human-readable draft.
 - **`sources/`** — third-party craft corpus (gitignored; rebuildable — see below).
-- **NEXT: exemplar regeneration** — run Fable sessions to write one human-grade
-  exemplar per brief in `core.jsonl`, using `sources/` to set the disposition.
-  Not started. Then: multi-sample-per-brief + clustering stability in run_judge.py.
+- **`harvest/baseline/exemplars/<ID>/`** — the 31 human-grade exemplars (the
+  quality bar), DONE 2026-07-18: Fable-authored, corpus-sourced, guardrail-free,
+  `[real]`-fact-verified, promoted with per-exemplar `provenance.json`. Rebuild via
+  `harvest/scripts/promote_exemplars.py`. Uncommitted as of that date.
+- **NEXT: run_judge.py scaling** — multi-sample-per-brief in `prepare` +
+  clustering-stability, then the first full judge run against these exemplars.
 
 ### Where the moving pieces live
 
@@ -48,7 +51,9 @@ tics. `tic_finder.py` (keyness diff) is backward-looking and secondary.
 |---|---|
 | Battery briefs (truth) | `harvest/battery/core.jsonl` |
 | Battery design | `harvest/battery/COVERAGE_SPEC.md` |
+| Exemplars (quality bar) | `harvest/baseline/exemplars/<ID>/exemplar.md` + `provenance.json` |
 | Judge tool | `harvest/scripts/run_judge.py` |
+| Promote exemplars | `harvest/scripts/promote_exemplars.py` |
 | Craft corpus | `sources/` (gitignored) + rebuild scripts in `harvest/scripts/` |
 | Raw craft sources (durable) | `~/makegood-harvest-sources/` (NOT in repo) |
 | First harvest run artifacts | `reports/2026-07-first-run/` (gitignored) |

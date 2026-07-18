@@ -1,0 +1,15 @@
+{
+  "id": "AN04",
+  "register": "R-ANALYTIC",
+  "substrate_kind": "real",
+  "brief_prompt": "Argue in about 450 words for which invention did more to shape the modern world: the printing press or the transistor. Take a side.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "f68f2562d26c7c43bdc25b1342016aed30d930315874fbc8c799f3dc135ca4e5",
+  "word_count": 441,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

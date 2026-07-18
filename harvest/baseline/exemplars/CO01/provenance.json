@@ -1,0 +1,15 @@
+{
+  "id": "CO01",
+  "register": "R-CORRESPONDENCE",
+  "substrate_kind": "invented",
+  "brief_prompt": "Write an email declining a meeting invitation from a colleague because you have a scheduling conflict, and propose two alternative times. Keep it brief.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "eeb9791bc85838ccab6d7b167a98358e557161d3ada617c21a58c537e0f97858",
+  "word_count": 58,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

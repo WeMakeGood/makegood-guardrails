@@ -1,0 +1,15 @@
+{
+  "id": "AN03",
+  "register": "R-ANALYTIC",
+  "substrate_kind": "invented",
+  "brief_prompt": "Write a roughly 400-word review of a fictional restaurant, \"The Copper Kettle,\" that does one thing extraordinarily well and several things poorly. Reach an overall verdict.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "f2889d7f5de99e552a6304fae20f5b378db43c8b9d416da66e3148ccdd08af90",
+  "word_count": 405,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

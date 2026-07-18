@@ -1,0 +1,15 @@
+{
+  "id": "NA05",
+  "register": "R-NARRATIVE",
+  "substrate_kind": "real",
+  "brief_prompt": "Describe the surface of the Moon as an Apollo astronaut would have first seen it up close, in about 300 words. Observed detail, not exposition.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "26a5453c463533e40f1df509fb94921fedb3eca0fa50929d7c8681e3030297bd",
+  "word_count": 293,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}
