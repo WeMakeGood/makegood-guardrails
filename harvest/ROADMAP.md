@@ -74,15 +74,22 @@ candidates are cross-checked against `tic_finder.py`'s.
 **Why.** 12 short single-output pairs gave suggestive z-scores (~2.4 top). Real
 confidence needs volume. The mechanism is proven; only the power is thin.
 
-**Do:** generate **multiple arm-B outputs per brief** (e.g. 3–5 samples each,
-varying nothing but sampling), pool them. Also wire the two arms properly: arm A
-(no S0) vs arm B (S0 core) so the harvest reports **gate effectiveness** (what
-S0 already suppresses vs. what leaks) — currently the tooling only exercises one
-arm at a time. Add a `--min-z` / significance note to `tic_finder.py` output so
-weak hits are visibly weak.
+**Multi-sample: BUILT 2026-07-18 (`run_judge.py` 0.2.0).** Generate N samples per
+brief named `<prompt-id>.<NN>.md` (default 3, operator step per H2). `prepare`
+pairs every sample against the brief's one exemplar and blinds each sample
+independently; `tally` uses **two-level recurrence** — a tic must recur across
+≥`--min-samples` samples of a brief (noise filter, default 2) AND ≥`--min-briefs`
+distinct briefs (range proof, default 3). Legacy single-sample runs work with
+`--min-samples 1`; `--min-pairs` kept as a deprecated alias. Verified on a
+fixture (two-level gating, back-compat, footgun guard).
 
-**Done when:** a pooled run reports which candidates clear a stated significance
-bar, and arm-A-vs-arm-B shows S0's current gate effectiveness.
+**Still open under "scale":** (1) wire arm A (no S0) vs arm B (S0 core) so the
+harvest reports **gate effectiveness** — what S0 already suppresses vs. what
+leaks; the tooling still exercises one arm at a time. (2) Add a `--min-z` /
+significance note to `tic_finder.py` so weak hits read as weak.
+
+**Done when:** arm-A-vs-arm-B shows S0's current gate effectiveness, and weak
+`tic_finder` hits are visibly flagged.
 
 ### 3. Close the doc/spec reconciliation — coordination debt
 

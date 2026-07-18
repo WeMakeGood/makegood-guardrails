@@ -54,25 +54,33 @@ Three subcommands, one packet format, one judgment schema:
 
 ```
 # 1. Build blinded packets (A/B randomized, provenance stripped) + sealed key.json
+#    OUTPUTS/ holds N samples per brief named <prompt-id>.<NN>.md (e.g. AN04.01.md);
+#    every sample pairs against baseline/exemplars/<brief>/exemplar.md.
 scripts/run_judge.py prepare --target-dir OUTPUTS/ \
     --exemplar-dir baseline/exemplars --out reports/<id>/judgments
 
-# 2. The judge (different-generation model, fresh context per pair) writes
-#    pair-<pid>.json per the schema printed in each packet. OR, optionally:
+# 2. The judge (most capable analytic model available, fresh context per pair)
+#    writes pair-<pid>.json per the schema printed in each packet. OR, optionally:
 scripts/run_judge.py dispatch --judgments reports/<id>/judgments \
-    --judge-model <different-generation model>   # needs `anthropic` SDK + a key
+    --judge-model <most-capable-available>   # needs `anthropic` SDK + a key
 
-# 3. Resolve the blinding, cluster, and report candidates
-scripts/run_judge.py tally --judgments reports/<id>/judgments
+# 3. Resolve the blinding, cluster, and report candidates (two-level recurrence)
+scripts/run_judge.py tally --judgments reports/<id>/judgments \
+    --min-samples 2 --min-briefs 3        # single-sample run: --min-samples 1
 ```
 
 `prepare` and `tally` are offline stdlib-only like the rest. `dispatch` is the
 one optional path that imports `anthropic` and touches the network — the offline
 flow is complete without it. Blindness is structural: the A/B→target/exemplar
-map is sealed in `key.json`, which the judge never reads and only `tally` opens.
-**Target-side recurrences (≥3 pairs) are candidates; exemplar-side recurrences
-are never dropped** — they route to the exemplar re-approval queue. Candidates,
-not verdicts — corroborate against `tic_finder.py` before admission.
+map is sealed in `key.json`, which the judge never reads and only `tally` opens;
+each sample of a brief is blinded independently. **Two-level recurrence:** a
+target-side tic must recur across ≥`--min-samples` samples of a brief (noise
+filter) AND ≥`--min-briefs` distinct briefs (range proof) to be a candidate;
+exemplar-side recurrences are never dropped — they route to the exemplar
+re-approval queue. Candidates, not verdicts — corroborate against `tic_finder.py`
+before admission. (Judge = the most capable analytic model available at harvest
+time, chosen on merit; if it equals the target model, note that overlap in
+provenance — a weaker independent check.)
 
 ## measure_density.py — known-tic regression (Component 4b)
 

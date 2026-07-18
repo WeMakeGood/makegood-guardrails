@@ -75,7 +75,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-SCRIPT_VERSION = "0.1.0"
+SCRIPT_VERSION = "0.2.0"  # 0.2.0: multi-sample per brief + two-level recurrence tally
 
 # The differential-reading prompt. Kept verbatim in sync with HARVEST.md H4 — if
 # one changes, change both. The judge compares two responses to the SAME brief
@@ -122,8 +122,26 @@ _BLIND_SEED = "harvest-h4-blind-judge"
 
 def _target_is_A(pid: str) -> bool:
     h = hashlib.sha256(f"{_BLIND_SEED}:{pid}".encode("utf-8")).hexdigest()
-    # low bit of the digest as the coin
+    # low bit of the digest as the coin. Seeded on the FULL sample-pair id
+    # (e.g. "AN04.02"), so multiple samples of one brief get independent A/B
+    # assignments rather than all landing on the same side — that independence
+    # is what keeps the blinding from being guessable per brief.
     return int(h[-1], 16) % 2 == 0
+
+
+def _brief_of(pid: str) -> str:
+    """Brief id for a sample-pair id.
+
+    Target samples are named <brief>.<NN>.md (e.g. AN04.02.md), so the pair id is
+    "AN04.02" and the brief is "AN04". A plain <brief>.md (single-sample, the
+    legacy shape) has no numeric suffix and is its own brief. Recognizing the
+    suffix only when it is all digits avoids mangling a brief id that itself
+    contains a dot.
+    """
+    head, _, tail = pid.rpartition(".")
+    if head and tail.isdigit():
+        return head
+    return pid
 
 
 def load(path: Path) -> str:
@@ -164,19 +182,24 @@ def sha256_text(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 def _match_pairs(target_dir: Path, exemplar_dir: Path):
-    """Yield (pid, target_path, exemplar_path) for every target with an exemplar.
+    """Yield (pid, brief, target_path, exemplar_path) for every target sample.
 
-    Mirrors tic_finder.py's matching: target file <pid>.md pairs with
-    exemplars/<pid>/exemplar.md.
+    Each target file is one sample. Its stem is the sample-pair id (pid); the
+    brief id is derived from it (see _brief_of). Every sample of a brief pairs
+    against that brief's single exemplar (exemplars/<brief>/exemplar.md), so N
+    samples of AN04 all compare against one AN04 exemplar. A single-sample run
+    (target file AN04.md) still works: pid == brief == "AN04".
     """
     matched = []
     for tgt in sorted(target_dir.glob("*.md")):
         pid = tgt.stem
-        ex = exemplar_dir / pid / "exemplar.md"
+        brief = _brief_of(pid)
+        ex = exemplar_dir / brief / "exemplar.md"
         if not ex.exists():
-            print(f"# no exemplar for {pid}, skipping", file=sys.stderr)
+            print(f"# no exemplar for brief {brief} (sample {pid}), skipping",
+                  file=sys.stderr)
             continue
-        matched.append((pid, tgt, ex))
+        matched.append((pid, brief, tgt, ex))
     return matched
 
 
@@ -232,7 +255,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         "pairs": {},
     }
 
-    for pid, tgt, ex in matched:
+    for pid, brief, tgt, ex in matched:
         tgt_text = load(tgt)
         ex_text = load(ex)
         if _target_is_A(pid):
@@ -246,6 +269,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         packet.write_text(_packet_text(pid, passage_a, passage_b), encoding="utf-8")
 
         key["pairs"][pid] = {
+            "brief": brief,  # two-level tally groups sample-pairs by their brief
             "A": a_side,
             "B": b_side,
             "target_file": str(tgt),
@@ -258,7 +282,9 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     key_path = out / "key.json"
     key_path.write_text(json.dumps(key, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print(f"Prepared {len(matched)} blinded packets in {out}/")
+    n_briefs = len({brief for _pid, brief, _t, _e in matched})
+    print(f"Prepared {len(matched)} blinded packets "
+          f"({len(matched)} samples across {n_briefs} briefs) in {out}/")
     print(f"  packets:  packet-<pid>.md   (judge reads these — NO provenance)")
     print(f"  key:      {key_path.name}   (SEALED — judge must NOT read this)")
     print()
@@ -404,6 +430,15 @@ def _load_judgments(judgdir: Path) -> dict[str, dict]:
 
 
 def cmd_tally(args: argparse.Namespace) -> int:
+    # Back-compat: --min-pairs reproduces the old single-level behavior (count
+    # distinct pairs, no per-brief sample gate) by forcing min_samples=1 and
+    # using its value as the brief threshold.
+    if args.min_pairs is not None:
+        args.min_samples = 1
+        args.min_briefs = args.min_pairs
+        print(f"# --min-pairs is deprecated; interpreting as --min-samples 1 "
+              f"--min-briefs {args.min_pairs}", file=sys.stderr)
+
     judgdir = args.judgments
     key = _load_key(judgdir)
     judgments = _load_judgments(judgdir)
@@ -418,6 +453,20 @@ def cmd_tally(args: argparse.Namespace) -> int:
     if extra:
         print(f"# WARNING: {len(extra)} judgment(s) with no sealed key entry "
               f"(ignored): {', '.join(sorted(extra))}", file=sys.stderr)
+
+    # Footgun guard: with only one sample per brief (a legacy single-output run),
+    # the default min_samples=2 can never be met, so every candidate is silently
+    # filtered out. Warn and point at the right flag rather than return an
+    # inexplicable empty tally.
+    samples_per_brief = defaultdict(int)
+    for p in prepared:
+        samples_per_brief[key["pairs"][p].get("brief") or _brief_of(p)] += 1
+    max_samples = max(samples_per_brief.values(), default=0)
+    if max_samples < args.min_samples:
+        print(f"# WARNING: no brief has >= {args.min_samples} samples "
+              f"(max is {max_samples}); with --min-samples {args.min_samples} "
+              f"nothing can qualify. For a single-sample run pass --min-samples 1 "
+              f"(or the legacy --min-pairs).", file=sys.stderr)
 
     # Build the cluster-key function. Default (offline): exact-match _norm_feature.
     # With --cluster-model: an LLM pass groups labels by meaning, so a real
@@ -435,13 +484,18 @@ def cmd_tally(args: argparse.Namespace) -> int:
         clustering = "exact-string"
 
     # Resolve every difference to a real side (target/exemplar) via the key, and
-    # cluster by feature family. Track which pairs each cluster spans —
-    # recurrence is counted in DISTINCT PAIRS, not raw mentions, so one verbose
-    # judgment listing a habit twice can't inflate the count.
-    # cluster -> side -> {display_name, pairs:set, habit_pairs:set, examples:[]}
+    # cluster by feature family. Recurrence is counted in DISTINCT SAMPLE-PAIRS,
+    # not raw mentions, so one verbose judgment listing a habit twice can't
+    # inflate the count. `brief_samples` groups those sample-pairs by their brief
+    # so the two-level test can run: a tic must recur across SAMPLES of a brief
+    # (filters sampling noise) AND across the range of BRIEFS (proves it isn't
+    # topic-specific).
+    # cluster -> side -> {display, pairs:set, habit_pairs:set,
+    #                     brief_samples:{brief:set(pid)}, examples:[]}
     clusters: dict[str, dict[str, dict]] = defaultdict(
         lambda: defaultdict(lambda: {
-            "display": None, "pairs": set(), "habit_pairs": set(), "examples": []
+            "display": None, "pairs": set(), "habit_pairs": set(),
+            "brief_samples": defaultdict(set), "examples": []
         }))
     raw_differences = []  # always emitted, ungrouped, for by-eye grouping
 
@@ -449,6 +503,7 @@ def cmd_tally(args: argparse.Namespace) -> int:
         keyrow = key["pairs"].get(pid)
         if not keyrow:
             continue  # already warned as 'extra'
+        brief = keyrow.get("brief") or _brief_of(pid)  # fallback for pre-brief keys
         for diff in judgment["differences"]:
             feat = diff.get("feature", "").strip()
             if not feat:
@@ -470,68 +525,99 @@ def cmd_tally(args: argparse.Namespace) -> int:
             habit = bool(diff.get("generated_habit"))
             quote = (diff.get("quote") or "").strip()
             for side in sides:
-                raw_differences.append({"pair": pid, "side": side, "feature": feat,
-                                        "family": ckey, "generated_habit": habit})
+                raw_differences.append({"pair": pid, "brief": brief, "side": side,
+                                        "feature": feat, "family": ckey,
+                                        "generated_habit": habit})
                 bucket = clusters[ckey][side]
                 # When clustering, the family name IS the cluster key — show it,
                 # so the display reflects the group, not one arbitrary member.
                 if bucket["display"] is None:
                     bucket["display"] = ckey if args.cluster_model else feat
                 bucket["pairs"].add(pid)
+                bucket["brief_samples"][brief].add(pid)
                 if habit:
                     bucket["habit_pairs"].add(pid)
                 if quote:
                     bucket["examples"].append((pid, quote))
 
-    threshold = args.min_pairs
+    # Two-level recurrence. A brief QUALIFIES for a tic when the tic appears in
+    # >= min_samples of that brief's sample-pairs (sampling noise filter). The
+    # tic is a CANDIDATE when it qualifies in >= min_briefs distinct briefs
+    # (range-of-work proof). With single-sample runs (one sample per brief),
+    # min_samples=1 makes every present brief qualify, so this reduces exactly to
+    # the old "distinct briefs >= threshold" behavior.
+    min_samples = args.min_samples
+    min_briefs = args.min_briefs
     target_candidates = []
     exemplar_recurrences = []
     for _ckey, sides in clusters.items():
         for side, b in sides.items():
-            n = len(b["pairs"])
+            qualifying = {br: sorted(s) for br, s in b["brief_samples"].items()
+                          if len(s) >= min_samples}
             row = {
                 "feature": b["display"],
                 "side": side,
                 "pairs": sorted(b["pairs"]),
-                "n_pairs": n,
+                "n_pairs": len(b["pairs"]),            # distinct sample-pairs
+                "n_briefs": len(b["brief_samples"]),   # distinct briefs touched
+                "n_qualifying_briefs": len(qualifying),
+                "qualifying_briefs": qualifying,       # brief -> its qualifying samples
                 "habit_pairs": sorted(b["habit_pairs"]),
                 "examples": b["examples"][:3],
             }
-            if side == "target" and n >= threshold:
-                target_candidates.append(row)
-            elif side == "exemplar" and n >= threshold:
-                exemplar_recurrences.append(row)
+            if len(qualifying) >= min_briefs:
+                if side == "target":
+                    target_candidates.append(row)
+                elif side == "exemplar":
+                    exemplar_recurrences.append(row)
 
-    target_candidates.sort(key=lambda r: (-r["n_pairs"], r["feature"]))
-    exemplar_recurrences.sort(key=lambda r: (-r["n_pairs"], r["feature"]))
+    # Rank by breadth of range first (qualifying briefs), then raw volume.
+    target_candidates.sort(
+        key=lambda r: (-r["n_qualifying_briefs"], -r["n_pairs"], r["feature"]))
+    exemplar_recurrences.sort(
+        key=lambda r: (-r["n_qualifying_briefs"], -r["n_pairs"], r["feature"]))
 
     if args.json:
         print(json.dumps({
             "script_version": SCRIPT_VERSION,
             "judgments_dir": str(judgdir),
             "clustering": clustering,
-            "min_pairs": threshold,
+            "min_samples": min_samples,
+            "min_briefs": min_briefs,
             "n_pairs_prepared": len(prepared),
             "n_pairs_judged": len(judged),
             "n_pairs_missing": len(missing),
+            "n_briefs_prepared": len({(key["pairs"][p].get("brief") or _brief_of(p))
+                                      for p in prepared}),
             "target_candidates": target_candidates,
             "exemplar_recurrences": exemplar_recurrences,
             "raw_differences": raw_differences,
         }, ensure_ascii=False, indent=2))
         return 0
 
-    _print_tally(judgdir, key, prepared, judged, threshold,
+    _print_tally(judgdir, key, prepared, judged, min_samples, min_briefs,
                  target_candidates, exemplar_recurrences, clustering, raw_differences)
     return 0
 
 
-def _print_tally(judgdir, key, prepared, judged, threshold,
+def _fmt_qual(r):
+    """One-line recap of a row's two-level counts."""
+    return (f"{r['n_qualifying_briefs']} qualifying briefs, "
+            f"{r['n_pairs']} sample-pairs across {r['n_briefs']} briefs")
+
+
+def _print_tally(judgdir, key, prepared, judged, min_samples, min_briefs,
                  target_candidates, exemplar_recurrences, clustering, raw_differences):
+    n_briefs_prep = len({(key["pairs"][p].get("brief") or _brief_of(p))
+                         for p in prepared})
     print(f"\n{'='*66}")
     print(f"BLIND-JUDGE DIFFERENCE TALLY   ({judgdir})")
     print(f"{'='*66}")
-    print(f"pairs prepared: {len(prepared)}   judged: {len(judged)}   "
-          f"recurrence threshold: >= {threshold} distinct pairs")
+    print(f"sample-pairs prepared: {len(prepared)}   judged: {len(judged)}   "
+          f"(across {n_briefs_prep} briefs)")
+    print(f"two-level threshold: a tic must appear in >= {min_samples} sample(s) "
+          f"of a brief to\n             qualify it, and qualify in >= {min_briefs} "
+          f"briefs to be a candidate")
     print(f"target_dir:  {key.get('target_dir')}")
     print(f"exemplar_dir: {key.get('exemplar_dir')}")
     print(f"clustering:  {clustering}", end="")
@@ -542,27 +628,27 @@ def _print_tally(judgdir, key, prepared, judged, threshold,
         print("  (labels grouped by meaning; LLM-assisted, not byte-reproducible "
               "— record in provenance)")
 
-    print(f"\n--- TARGET-SIDE recurrences (>= {threshold} pairs) — CANDIDATES ---")
+    print(f"\n--- TARGET-SIDE recurrences — CANDIDATES ---")
     if not target_candidates:
-        print("  (none cleared the threshold)")
+        print("  (none cleared the two-level threshold)")
     for r in target_candidates:
         habit = f"  [reads-as-generated-habit in {len(r['habit_pairs'])}/{r['n_pairs']}]" \
             if r["habit_pairs"] else ""
-        print(f"\n  • {r['feature']}   ({r['n_pairs']} pairs: "
-              f"{', '.join(r['pairs'])}){habit}")
+        print(f"\n  • {r['feature']}   ({_fmt_qual(r)}){habit}")
+        print(f"      qualifying briefs: "
+              f"{', '.join(f'{br}[{len(s)}]' for br, s in sorted(r['qualifying_briefs'].items()))}")
         for pid, q in r["examples"]:
             q1 = q if len(q) <= 100 else q[:97] + "..."
             print(f"      {pid}: “{q1}”")
 
-    print(f"\n--- EXEMPLAR-SIDE recurrences (>= {threshold} pairs) ---")
+    print(f"\n--- EXEMPLAR-SIDE recurrences ---")
     print("  Never dropped. Route to the exemplar re-approval queue: these are")
     print("  either exemplar-quality feedback or the exemplar generator's own")
     print("  signature (HARVEST.md H4).")
     if not exemplar_recurrences:
-        print("  (none cleared the threshold)")
+        print("  (none cleared the two-level threshold)")
     for r in exemplar_recurrences:
-        print(f"\n  • {r['feature']}   ({r['n_pairs']} pairs: "
-              f"{', '.join(r['pairs'])})")
+        print(f"\n  • {r['feature']}   ({_fmt_qual(r)})")
         for pid, q in r["examples"]:
             q1 = q if len(q) <= 100 else q[:97] + "..."
             print(f"      {pid}: “{q1}”")
@@ -573,14 +659,25 @@ def _print_tally(judgdir, key, prepared, judged, threshold,
     # under-clustering failure.
     tgt_raw = [d for d in raw_differences if d["side"] == "target"]
     from collections import defaultdict as _dd
-    by_fam = _dd(set)
+    by_fam_briefs = _dd(set)   # family -> set of briefs it qualified in
+    by_fam_pairs = _dd(set)    # family -> set of sample-pairs (for the raw count)
+    fam_brief_samples = _dd(lambda: _dd(set))  # family -> brief -> samples
     for d in tgt_raw:
-        by_fam[d["family"]].add(d["pair"])
+        br = d.get("brief") or _brief_of(d["pair"])
+        fam_brief_samples[d["family"]][br].add(d["pair"])
+        by_fam_pairs[d["family"]].add(d["pair"])
+    for fam, briefs in fam_brief_samples.items():
+        for br, samples in briefs.items():
+            if len(samples) >= min_samples:
+                by_fam_briefs[fam].add(br)
     print(f"\n--- RAW target-side labels by family ({len(tgt_raw)} total, "
           f"below-threshold included) ---")
-    for fam, pairs in sorted(by_fam.items(), key=lambda kv: (-len(kv[1]), kv[0])):
-        mark = " *" if len(pairs) >= threshold else ""
-        print(f"  {len(pairs):>2} pairs{mark}  {fam[:70]}")
+    for fam in sorted(by_fam_pairs,
+                      key=lambda f: (-len(by_fam_briefs[f]), -len(by_fam_pairs[f]), f)):
+        qb = len(by_fam_briefs[fam])
+        mark = " *" if qb >= min_briefs else ""
+        print(f"  {qb:>2} qual-briefs / {len(by_fam_pairs[fam]):>2} pairs{mark}  "
+              f"{fam[:66]}")
 
     print(f"\n{'-'*66}")
     print("Candidates, not verdicts. A target-side recurrence is a candidate for")
@@ -708,8 +805,16 @@ def main() -> int:
     pt = sub.add_parser("tally", help="resolve blinding, cluster, report candidates")
     pt.add_argument("--judgments", type=Path, required=True,
                     help="dir with key.json + pair-<pid>.json judgments")
-    pt.add_argument("--min-pairs", type=int, default=3,
-                    help="recurrence threshold in distinct pairs (default 3, per H4)")
+    pt.add_argument("--min-samples", type=int, default=2,
+                    help="a tic must appear in >= this many of a brief's sample-pairs "
+                         "to QUALIFY that brief (sampling-noise filter; default 2). "
+                         "Set to 1 for single-sample runs so every present brief qualifies.")
+    pt.add_argument("--min-briefs", type=int, default=3,
+                    help="a tic must qualify in >= this many distinct briefs to be a "
+                         "CANDIDATE (range-of-work proof; default 3, per H4).")
+    pt.add_argument("--min-pairs", type=int, default=None,
+                    help="DEPRECATED alias: sets --min-briefs and forces --min-samples 1 "
+                         "(reproduces the old single-level 'distinct pairs' behavior).")
     pt.add_argument("--cluster-model", default=None,
                     help="group the judge's free-text feature labels by MEANING via "
                          "this model (e.g. claude-opus-4-8) before counting recurrence. "

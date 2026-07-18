@@ -44,7 +44,17 @@ Per model × per arm × per prompt, **fresh context every prompt**:
 | A — control | `battery/context-card.md` only | Raw signature; gate-effectiveness denominator |
 | B — gates-only | context card + **S0 core** at the harvest's target version, with the BACKSTOP region left empty | Primary corpus — what leaks past the gates is the backstop's job |
 
-- [ ] Save each output to `outputs/<model>/<arm>/<prompt-id>.md`, verbatim, no edits.
+- [ ] **Multiple samples per brief.** Generate N samples of each brief per arm
+  (default 3; more is better — quality over economy), varying *nothing but
+  sampling* (same system prompt, same brief, fresh context each time). Save each
+  as `outputs/<model>/<arm>/<prompt-id>.<NN>.md` — e.g. `AN04.01.md`, `AN04.02.md`,
+  `AN04.03.md`. This is the "--samples N" knob: it is a manual operator step, not
+  a tool flag — the harvest keeps generation operator-run with fresh context per
+  prompt. `run_judge.py prepare` reads the `<prompt-id>.<NN>.md` convention and
+  pairs every sample against the one exemplar for that brief; `tally` then
+  requires a tic to recur across SAMPLES of a brief (noise filter) and across
+  BRIEFS (range proof). A single sample (`<prompt-id>.md`, no suffix) still works
+  but needs `tally --min-samples 1`.
 - [ ] No voice profiles, no other modules, no backstop in either arm.
 
 ## H3 — Statistical detection: open diff (discovery) + known-tic regression
@@ -68,7 +78,7 @@ Per model × per arm × per prompt, **fresh context every prompt**:
 > habits imposed on the content* rather than choices serving it, name them
 > specifically.
 
-- [ ] Save transcripts to `judgments/`. Compile the **difference tally**: differences clustered across pairs, each tagged with direction (target-side vs. exemplar-side). Target-side differences recurring across ≥ 3 pairs are candidates. **Exemplar-side recurring patterns are never dropped** — they are exemplar-quality feedback or the exemplar generator's signature; route them to the exemplar re-approval queue and the next identification pass.
+- [ ] Save transcripts to `judgments/`. Compile the **difference tally** (`run_judge.py tally`): differences clustered across sample-pairs, each tagged with direction (target-side vs. exemplar-side). **Two-level recurrence** (multi-sample runs): a tic must appear in ≥ `--min-samples` sample-pairs of a brief to QUALIFY that brief (default 2; filters sampling noise), and qualify in ≥ `--min-briefs` distinct briefs to be a CANDIDATE (default 3; proves it spans the range of work, not one topic). A single-sample run uses `--min-samples 1`. **Exemplar-side recurring patterns are never dropped** — they are exemplar-quality feedback or the exemplar generator's signature; route them to the exemplar re-approval queue and the next identification pass.
 - [ ] Compute **gate effectiveness**: arm A vs. arm B difference volume and severity — which patterns the gates suppressed, which passed untouched.
 
 ## H5 — External signal
