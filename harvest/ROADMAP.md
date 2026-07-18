@@ -7,51 +7,47 @@ back a trustworthy list of its tics.* Everything here is measured against that.
 Design rationale lives in `../HARVEST_PLAN.md`; the operator checklist in
 `HARVEST.md`; the reference layer in `baseline/README.md`.
 
-> **STATUS (2026-07-17): battery + exemplars retired; priorities changed.** The
-> single-org (Harbor Bend) promotional battery and its 12 exemplars are DELETED —
-> replaced by the domain/register battery in
-> [`battery/COVERAGE_SPEC.md`](battery/COVERAGE_SPEC.md). The **blind judge
-> (`run_judge.py`) is now the primary detector**; `tic_finder.py` is backward-
-> looking (keyed to already-known tics) and deprioritized. New work is scoped in
-> the spec (multi-sample per brief, clustering stability, provenance-as-deliverable)
-> and `[[harvest-battery-purpose]]`. The "Next / priority order" section below
-> predates this and is superseded by the spec.
+> **STATUS (2026-07-18): battery replaced; exemplars REGENERATED + committed.**
+> The single-org (Harbor Bend) promotional battery and its 12 exemplars were
+> deleted and replaced by the domain/register battery in
+> [`battery/COVERAGE_SPEC.md`](battery/COVERAGE_SPEC.md) (31 briefs, 8 registers).
+> All 31 exemplars are now regenerated, verified, and committed at
+> `baseline/exemplars/<ID>/` with per-exemplar provenance (commit f0ff32c). They
+> were generated `v2-learn-decisions`: the generator learns the DECISIONS behind
+> the craft corpus rather than imitating voice — this cut the generator's own
+> em-dash tic from 2.94 to 1.35 per 250w (human-corpus baseline 0.67) WITHOUT
+> naming any tic, directly retiring the "exemplar-generator tics leaking into the
+> reference" risk below. The **blind judge (`run_judge.py`) is the primary
+> detector**; `tic_finder.py` is backward-looking and deprioritized. Remaining
+> new work: multi-sample per brief, clustering stability, provenance-as-
+> deliverable — see the spec, `[[harvest-battery-purpose]]`, and
+> `[[harvest-exemplar-learning-instruction]]`. The "Next / priority order" below
+> is largely superseded by the spec; item 2 (scale) is the live tooling task.
 
 ---
 
 ## Built and working
 
-- ~~**Frozen synthetic baseline** — 12 exemplars, one per Harbor Bend core brief.~~
-  **RETIRED 2026-07-17.** Deleted with the single-org battery it matched. The
-  exemplar *mechanism* carries forward (Fable, broad-craft-sourced, guardrail-free)
-  but is regenerated against the new briefs. See the spec.
+- **Exemplar quality-bar set — 31 exemplars, one per brief in `battery/core.jsonl`.**
+  REGENERATED + committed 2026-07-18 (commit f0ff32c) at `baseline/exemplars/<ID>/`
+  with per-exemplar `provenance.json`. Fable-authored, guardrail-free,
+  `v2-learn-decisions` method (learn the corpus's decisions, don't imitate voice).
+  Rebuild via `scripts/promote_exemplars.py`. Replaced the retired 12 Harbor Bend
+  exemplars. (Note: `baseline/fingerprints/`, `baseline/craft/`,
+  `baseline/constructions/` remain empty stubs — optional enrichment, see below.)
 - **`run_judge.py`** (Component 5, blind judge) — the PRIMARY detector. prepare /
   dispatch / tally + optional LLM clustering; verified live end-to-end against the
   API 2026-07-17. Reads whatever target/exemplar pairs it's given — register-
   agnostic, so it survives the battery replacement.
-- **`tic_finder.py`** (Component 4a) — open log-odds keyness diff. Works, but
-  DEPRIORITIZED: it can only rank features a human still recognizes as a known
-  tic, so it's backward-looking. Kept as a secondary cross-check, not the
-  instrument.
 - **`tic_finder.py`** (Component 4a, discovery) — open log-odds keyness diff.
   Proven end-to-end: Opus-4.8 arm-A × 12 briefs pooled surfaced real current-gen
-  tics (dash-overuse, spaced-dash, colon elaboration, formulaic openings).
+  tics (dash-overuse, spaced-dash, colon elaboration, formulaic openings). Works,
+  but DEPRIORITIZED — it can only rank features a human still recognizes as a
+  known tic, so it's backward-looking. Kept as a secondary cross-check.
 - **`measure_density.py`** (Component 4b, regression) — known-tic counter, demoted
   to a regression suite for existing backstop entries.
 - **Intake:** `scan_sources.py` (triage), `extract_body.py` (prose extraction);
   14-text human panel (`panel.jsonl`) as craft-study input + grounding reference.
-- **`run_judge.py`** (Component 5, blind-judge leg) — the second independent
-  detector, working at **any N**. `prepare` builds A/B-randomized, provenance-
-  stripped packets from an arm's outputs plus a sealed `key.json`; the judge
-  (the most capable analytic model available, fresh context per pair) writes structured
-  `pair-<pid>.json` per the H4 differential prompt; `tally` resolves the blinding,
-  clusters differences by distinct-pair recurrence, and reports target-side
-  candidates (≥3 pairs) and exemplar-side recurrences (routed to re-approval,
-  never dropped). Offline stdlib-only like the other scripts; an optional
-  `dispatch` subcommand runs the pairs through the Anthropic API. **Not yet
-  exercised end-to-end against a real judge run** — the offline flow (prepare →
-  tally) is verified on a fixture; `dispatch` (API path) is structurally complete
-  but untested (no SDK/key in the build environment).
 
 ---
 
@@ -135,11 +131,16 @@ or reject with real rigor.
 
 ## Named risks to watch
 
-- **Exemplar-generator tics leaking into the reference.** Craft-sourcing made the
-  exemplars more stylistically assertive (moves AI overuses). The statistical
-  diff may under-flag those; the blind judge (`run_judge.py`) is the primary
-  mitigation.
-  Re-examine at the next exemplar re-approval.
+- **Exemplar-generator tics leaking into the reference.** MEASURED + MITIGATED
+  2026-07-18. v1 craft-sourcing did leak a tic: em-dashes at 2.94/250w vs a
+  human-corpus baseline of 0.67. Fix was the `v2-learn-decisions` generation
+  instruction (learn the corpus's decisions, don't imitate voice), which cut it
+  to 1.35/250w without naming any tic — so no tic theory entered the yardstick.
+  Residual risk persists at the punctuation level (still above human), so: for
+  punctuation-level tics use the `sources/` human corpus as the baseline, not the
+  exemplars; the blind judge remains the primary mitigation. ALWAYS run the human
+  corpus as a control before treating a raw count as a finding. Re-examine at each
+  exemplar re-approval. See `[[harvest-exemplar-learning-instruction]]`.
 - **Content-word noise in the diff.** `tic_finder.py` ranks topic words too;
   admission always requires a human to name the structural candidate and a
   grounding check. Never wire the ranker straight to the backstop.
