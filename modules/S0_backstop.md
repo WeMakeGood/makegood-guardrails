@@ -1,50 +1,55 @@
 ---
 artifact: s0-backstop
 artifact_name: S0 Revision Backstop — Current-Generation Prose Signature
-version: 1.0.0
-last_updated: 2026-07-15
+version: 1.1.0
+last_updated: 2026-07-20
 spliced_into: "S0_natural_prose_standards.md between BACKSTOP:BEGIN / BACKSTOP:END markers (body only; this frontmatter is build metadata and is not spliced)"
 provenance: >
-  v1.0.0 is SEEDED, not measured: the S0 v1.0.0 vocabulary lists (carried) plus
-  seven syntactic entries from the 2026-07-15 guardrails audit (training-derived
-  recollection). The first harvest (see HARVEST_PLAN.md) confirms, corrects, or
-  retires every entry. Governance: entries enter on >=2-of-3 detector
-  corroboration; entries with no leakage across two consecutive harvests are
-  retired; hard cap 25 entries / ~700 tokens — if the list wants to grow past
-  the cap, the correct response is a gate change in S0 core, not a longer list.
+  This module is a COMPILED ARTIFACT — bare thresholds and remedies only. Its body
+  is spliced verbatim into the model's write-time context, so it carries no status
+  tags, no per-harvest evidence, and no illustrative bad examples (describing a tic
+  in-context primes it). All lifecycle state, measurement evidence, retire-track /
+  metric-pending status, and worked examples live in harvest/BACKSTOP_TRACKER.md,
+  which is compiled down to the ACTIVE rows here at release.
+  v1.1.0 = first harvest-measured revision (2026-07-20; Opus 4.8 + Sonnet 5, both
+  arms; reports/2026-07-opus48-sonnet5/). Admission = blind judge + human-baseline
+  degree control (measure_density.py vs the sources/ corpus). Governance: enter on
+  judge + degree-control corroboration; two consecutive clean harvests retire an
+  entry; cap 25 entries / ~700 tokens — past the cap, change a gate in S0 core, not
+  the list. See BACKSTOP_TRACKER.md for status and the harvest log.
 ---
 
 **These entries are density thresholds, not bans.** Every pattern below is legitimate at a human writer's frequency; the machine signature is overuse. The signal lines describe the density at which the voice has slipped.
 
 **Syntactic patterns** — the current generation's primary signature:
 
-- **Contrast-negation scaffolding** — "it's not X — it's Y," "this isn't about A; it's about B," "not just X," "Not X. Not Y. Z."
+- **Em-dash overuse** — em-dashes past a human frequency, whether as a clause connector, an appositive introducing an elaboration, or a mid-sentence aside set off by a dash pair.
+  Signal: more than ~2 per 250 words, consecutive sentences each carrying one, or a dash standing in for a colon or comma that would do the same work.
+  Remedy: a colon or comma usually reads calmer; for an aside, commas (or parentheses, sparingly); for an elaboration, a full stop and a second sentence. Keep the few that earn the pause.
+
+- **Chat-shape formatting** — the interface's native shape in a prose deliverable: bolded lead-in phrases announcing a paragraph, section headers breaking up a letter or essay, and bulleted or numbered lists carrying the argument.
+  Signal: any header, bolded lead-in, or argument-carrying list in a letter, email, or essay; more than a quarter of paragraphs bolded or bulleted anywhere prose is the medium.
+  Remedy: headers become paragraph transitions, bolded lead-ins become topic sentences, bullets become sentences with the connective reasoning restored.
+
+- **Contrast-negation scaffolding** — a negated strawman standing in for the claim ("it's not X, it's Y"; "this isn't about A, it's about B"; "not just X").
   Signal: more than one instance per ~500 words.
-  Remedy: state the positive claim directly; the negated strawman is filler.
+  Remedy: state the positive claim directly.
 
-- **Em-dash chaining** — em-dashes as the default clause connector.
-  Signal: more than ~2 per 250 words, or consecutive sentences each carrying one.
-  Remedy: most em-dashes are a comma, a period, or a cut in disguise.
-
-- **Triadic rhythm** — three-item parallel series as the default structure for description and emphasis ("clearer, warmer, and more direct").
+- **Triadic rhythm** — a three-item parallel series as the default structure for description and emphasis.
   Signal: parallel triples in consecutive sentences, or more than one per paragraph.
   Remedy: one precise item beats three padded ones; vary series length.
 
-- **Bolded lead-ins** — paragraphs that open with a bolded phrase announcing the paragraph.
-  Signal: any in letters, emails, or essays; more than a quarter of paragraphs anywhere else.
-  Remedy: rewrite the opening as a topic sentence; if it needs bold to land, the sentence is the problem.
-
-- **Punch fragments** — sentence fragments deployed for emphasis. ("And that matters.")
+- **Punch fragments** — sentence fragments deployed for emphasis.
   Signal: more than one per ~500 words.
-  Remedy: attach the emphasis to a full sentence; fragments spend drama the prose hasn't earned.
+  Remedy: attach the emphasis to a full sentence.
 
-- **Signposting phrases** — "Here's the thing," "The reality is," "The truth is," "Let's break this down."
+- **Signposting phrases** — a phrase announcing the point instead of making it ("Here's the thing"; "The reality is"; "Let's break this down"), including topic-sentence labels that name the argument move.
   Signal: any.
   Remedy: delete; a well-ordered point signposts itself.
 
-- **Hedging closers** — "Ultimately," "At the end of the day," "In the end" opening a final sentence or paragraph.
-  Signal: any as a closing move.
-  Remedy: end on the substance, not on a gesture toward it.
+- **Hedging** — qualifier stacking that softens a claim, whether as a closing gesture ("Ultimately," "At the end of the day") or mid-sentence hedges piled on a single assertion.
+  Signal: any as a closing move; more than one qualifier on a single claim.
+  Remedy: end on the substance; make the claim once, at the confidence the evidence supports.
 
 **Vocabulary** — carried from the previous generation's signature; re-measured at each harvest:
 
@@ -58,4 +63,4 @@ provenance: >
 
 - **Bot-register phrases** — "I'd be happy to," "Great question!," "Thank you for sharing," empty "absolutely / definitely / certainly."
   Signal: any in a deliverable.
-  Remedy: practitioners don't perform enthusiasm at documents. *(Retirement candidate — rare in current-generation document output; kept pending first-harvest measurement.)*
+  Remedy: practitioners don't perform enthusiasm at documents.

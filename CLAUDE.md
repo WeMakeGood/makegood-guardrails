@@ -11,6 +11,14 @@ The source of truth for Make Good's guardrail modules. `modules/S0_backstop.md`
 is the current-generation prose-signature list; it is meant to be maintained by
 **measurement, not recollection** — via the *harvest* under `harvest/`.
 
+`S0_backstop.md` is a **clean compiled artifact**: bare thresholds + remedies, no
+status tags, no evidence, no illustrative bad examples. Its body splices verbatim
+into the model's write-time context, so describing a tic there would *prime* it.
+All lifecycle state (active / provisional / metric-pending / retire-track),
+per-harvest evidence, and worked examples live in `harvest/BACKSTOP_TRACKER.md`,
+which is compiled by hand down to the ACTIVE rows in the shipped module at each
+release. Edit the tracker when reasoning; edit the backstop only to ship.
+
 ## The harvest — active redesign (as of 2026-07-17)
 
 The harvest is a **model-stress instrument**: it discovers a new model's unknown
