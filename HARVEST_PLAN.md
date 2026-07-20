@@ -1,6 +1,15 @@
 # Prose-Signature Harvest — Design Plan
 
-*Drafted 2026-07-15. Status: proposal for review (Chris). Nothing in this plan has been built.*
+*Drafted 2026-07-15. Design rationale for the harvest. Substantial parts are now
+built (as of 2026-07-18): the replacement battery (`harvest/battery/core.jsonl`,
+31 briefs / 8 registers), all 31 exemplars (`harvest/baseline/exemplars/`), the
+blind judge (`harvest/scripts/run_judge.py`, primary detector, multi-sample +
+two-level recurrence), `tic_finder.py`, and intake tooling. The current build
+state and priorities live in [`harvest/ROADMAP.md`](harvest/ROADMAP.md); the
+operator runbook in [`harvest/HARVEST.md`](harvest/HARVEST.md). Two design points
+below were superseded by decisions on 2026-07-17/18 and are flagged inline: the
+battery is now a **growing pool, not frozen**, and the judge is chosen as the
+**most capable analytic model**, not merely a different generation.*
 
 ---
 
@@ -18,9 +27,10 @@ The fix is to stop authoring the list and start **measuring** it: generate outpu
 ## Design principles (settled)
 
 - **Never rely on self-report.** No detector asks a model "what are your tics." All detection observes generated output from the outside: counting, blind judging, or external published analysis.
+- **Discovery over confirmation.** The instrument must be able to surface a pattern nobody has named yet. Closed metric sets are regression suites for *known* entries; discovery runs on open feature spaces (distributional diffs) and open questions (differential reading) against a testable standard. Any layer that can only confirm what's already named must never be the headline.
 - **Thresholds, not bans.** Most tics are legitimate techniques at human density — em-dashes and the rule of three are classical rhetoric. The machine signature is *overuse*. Backstop entries encode density thresholds relative to a human baseline, never absolute prohibitions.
 - **Evidence earns a slot.** A pattern enters the backstop only when flagged by at least two of the three detectors (statistical, judge, external). A pattern with no observed leakage across two consecutive harvests is retired. The list can shrink.
-- **The battery is frozen; the models change.** A fixed prompt core makes harvests comparable across model generations — the longitudinal signal is the point. A small rotating minority guards against overfitting the gates to the battery.
+- **Stable core + growing pool; the models change.** *(Revised 2026-07-17 — superseded the original "the battery is frozen.")* A stable brief core makes harvests comparable across model generations — the longitudinal signal is the point. But the battery is designed to **grow**: registers and briefs are added as coverage gaps surface, because a discovery instrument for tics we can't yet name needs room for an unknown tic to appear. Freezing optimizes for regression (watch a known tic move against fixed inputs) — the opposite of discovery. Regression tracking of known tics is a separate, smaller concern. See `[[harvest-battery-purpose]]`.
 - **The reference numbers come from pre-2023 human writing.** Human writing is increasingly model-inflected, so the identification panel measures only verifiably pre-2023 published texts. The panel is measure-and-cite (no text stored); re-deriving the envelope is a versioned event, never a silent drift.
 - **Distribution rides the existing lock pipeline.** The backstop is an independently versioned artifact in this repo, pinned via `guardrails.lock`, vendored by `--resolve-guardrails`. Libraries adopt updates by deliberate bump, exactly like F0/S0 today. No runtime lookup, ever — always-load content is in the system prompt from turn one, per the delivery principle in the skill's ARCHITECTURE.md.
 - **Human review is non-negotiable.** The harvest proposes; a human disposes. A fully automated list would let one anomalous run ban ordinary English.
@@ -113,19 +123,32 @@ makegood-guardrails/
   harvest/
     HARVEST.md                              (the runbook — protocol below)
     battery/
-      context-card.md                       (fictional-org facts, frozen)
-      core.md                               (F01–F12, frozen)
-      rotating.md                           (R-pool; 4 selected per harvest)
+      core.jsonl                            (31 briefs / 8 registers; [invented]/[real] tagged; stable core + growing pool)
+      COVERAGE_SPEC.md                      (battery design: registers, tagging, growth)
+      BRIEFS_DRAFT.md                       (human-readable draft of the briefs)
     baseline/
-      README.md                             (identification-panel spec + rules)
-      panel.md                              (provenance list: citation, genre, natural length, stats — text never stored)
-      metrics-baseline.json                 (per-genre human envelopes; re-derived per versioned identification pass)
-      constructions/                        (synthetic, envelope-validated test artifacts — never threshold sources)
-        positive/                           (inside envelope — counters must NOT fire)
-        negative/                           (tic-maximal — counters MUST fire)
-        foils/                              (judge foils: cross-generation, envelope-validated)
+      README.md                             (reference-layer spec + rules)
+      exemplars/                            (THE REFERENCE: per-brief synthetic exemplars, versioned + re-approved)
+        README.md                           (exemplar provenance + generation rules)
+        <ID>/exemplar.md + provenance.json  (one craft-strong exemplar per brief; 31 committed)
+      panel.jsonl                           (human-writing ledger: citations + per-text stats; craft-study input + grounding, NOT the baseline)
+      panel.md                              (human-readable panel view)
+      metrics-baseline.json                 (known-tic envelopes — regression reference only, never the discovery instrument) [when needed]
+      craft/                                (OPTIONAL/future: per-genre craft profiles — roadmap enrichment; empty stub)
+      fingerprints/                         (OPTIONAL/future: per-genre aggregate distributions — second discovery reference; empty stub)
+      constructions/                        (when regression-checking known entries; empty stub)
+        positive/                           (inside envelope — regression metrics must NOT fire)
+        negative/                           (tic-maximal — regression metrics MUST fire)
     scripts/
-      measure_density.py                    (Phase 2 — spec in Component 4)
+      run_judge.py                          (blind judge — Component 5; PRIMARY detector; multi-sample + two-level recurrence)
+      tic_finder.py                         (open discovery diff — Component 4a; backward-looking secondary)
+      measure_density.py                    (known-tic regression counter — Component 4b)
+      promote_exemplars.py                  (promote staged exemplars → baseline/exemplars/ + provenance)
+      extract_body.py                       (prose-boundary preprocessing)
+      scan_sources.py                       (panel source-drop triage)
+      build_sources.py / recover_failures.py (rebuild the sources/ craft corpus)
+    ROADMAP.md                              (what's built, what's next: first judge run, scale, enrichment)
+  sources/                                  (gitignored craft corpus Fable studies; rebuildable)
     reports/
       2026-07-sonnet-5/                     (one directory per harvest)
         outputs/                            (raw generations, both arms)
@@ -135,27 +158,30 @@ makegood-guardrails/
         REPORT.md                           (the operator-facing report)
 ```
 
-### Reference architecture: identification panel + synthetic constructions (settled 2026-07-15, third revision)
+### Reference architecture: synthetic exemplar reference → differential testing (working design; battery replaced 2026-07-17, exemplars committed 2026-07-18)
 
-The reference layer has two jobs that were originally conflated into one "baseline corpus" artifact. Three designs were rejected on the way here:
+**The purpose, stated first because getting it wrong invalidated three designs:** the reference layer must make it possible to identify problems that appear in *later* models — patterns nobody has named yet — and to test for them reproducibly. A closed set of known-tic metrics can only re-measure what's already named; a baseline expressed as tic-count envelopes is the stale-recollection failure mode wearing a quantitative costume. Four rejected designs:
 
-1. A freely model-*synthesized* baseline — the baseline defines human density for the constructions the model overuses; a model freely authoring it carries the measured generation's own densities and collapses the deltas toward zero.
-2. A **Make Good–archives baseline** — S0 is a *normalizer* (generic practitioner floor; voice specificity is the voice profiles' job per S0 2.0.1 precedence). Calibrating on one house style defines "human density" as one speaker's density.
-3. A **curated fixed-length human-sample corpus** — fixed word-count bands ignore genre length reality (an excellent feature at its natural length can't be excerpted to 400–700 words without distorting the very density profile being measured), and any hand-curated human set is too small and too sparse to test against.
+1. A freely model-*synthesized* baseline — carries the measuring generation's own densities; the ruler measures itself. (Escaped by generating with a *different* generation than the target and craft-sourcing from real human writing.)
+2. A **Make Good–archives baseline** — S0 is a *normalizer* (generic practitioner floor; voice specificity is the voice profiles' job per S0 2.0.1 precedence); one house style must not define "human normal."
+3. A **curated fixed-length human-sample corpus** — fixed word-count bands ignore genre length reality, and any hand-curated human set is too small to test against.
+4. An **identification panel reduced to known-tic envelopes** — structurally incapable of surfacing an unnamed tic, because there is no column for it. Measuring real writing only on the 12 named metrics answers "how much do humans use the tics we already know?" — not the question.
 
-The replacement splits the two jobs:
+A fifth design (the "v4" three-layer plan: collected panel → craft profiles + fingerprints → exemplars → differential testing) was **correct but heavier than needed.** In practice the collect/screen/discard corpus work was the bottleneck and wasn't required to reach the goal. The **working design** keeps v4's principle (*discovery over confirmation*) and its invariants, and simplifies the machinery: the synthetic exemplars **are** the baseline; the human panel is craft-input + grounding, not a required product pipeline.
 
-**Job 1 — the numbers: an identification panel (measure, never store).** Real, editorially excellent, verifiably pre-2023 published writing is measured **in situ at its natural length** — every Component-4 metric is length-normalized (per-1,000-words, per-sentence rates), so natural length is not a problem, it's the point. Only derived statistics and citations are retained; no text is stored, excerpted, or anonymized (which also removes the copyright-storage and anonymization-distortion questions entirely). Because it's measure-and-cite rather than curate-and-store, N scales cheaply: target 15–25 texts per battery genre (~150–250 total), many authors and organizations, diversity cap ~2 texts per author/org, editorial-quality screen. Output: `baseline/metrics-baseline.json` — per-genre, per-metric **human envelopes** (median + spread) — plus `baseline/panel.md`, the provenance list. Re-running the identification pass (new texts, new metrics) is a versioned event.
+**The reference — a synthetic exemplar set (the quality bar).** For every battery brief, a craft-strong **exemplar** (`baseline/exemplars/<ID>/exemplar.md`), written to the *same brief* (and substrate, where the register has one) the battery uses. Task-matching is the property only synthesis provides and the reason this works — a diff against real text is confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. The exemplar is the human-grade **quality bar**: what the best available model produces disposed to write like the skilled humans in the craft corpus. Generation rules (full detail in `baseline/exemplars/README.md`): **different model generation** than the targets (the cross-generation guard); **no S0/F0/backstop/tic-list** in the generator's context (sourcing the reference with our tic theory would re-close the discovery loop); **craft-sourced via `v2-learn-decisions`** (the generator learns the *decisions* behind the `sources/` corpus rather than imitating voice — reaches sub-tone mechanics a "write like this" prompt misses); **versioned + re-approved**, not frozen-forever. Economical (no collection treadmill), repeatable (one task-matched yardstick per brief across models over time). 31 exemplars committed 2026-07-18. See `[[harvest-exemplar-learning-instruction]]`.
 
-**Job 2 — the text artifacts: synthetic constructions built to the identified spec.** Wherever an actual passage is needed, it is synthetic — constructed to *highlight elements identified in real samples* without being a sample — and **validated by the counters against the envelope before use**. Three roles, in `baseline/constructions/`:
+**The human panel — craft input + grounding, not the baseline.** The measured human texts (`panel.jsonl`) are what the generator *studies* to write craft-strong exemplars, and the reference a discovered candidate is grounding-checked against. It never grows on a schedule; it is enrichment, not a harvest blocker.
 
-- **Positive controls** (`positive/`) — built inside the human envelope; the counters must NOT fire on them. Specificity tests.
-- **Negative controls** (`negative/`) — deliberately tic-maximal; the counters MUST fire. Sensitivity tests.
-- **Judge foils** (`foils/`) — genre- and length-matched to each battery output, generated by a **different model generation** than the harvest target, constrained to the envelope, counter-validated (out-of-envelope foils are discarded and regenerated). These replace human samples in Component 5's pairing.
+**Differential testing (the discovery engine).** Same brief, model output vs. exemplar:
 
-**The one-way flow is the invariant:** measured reality → envelope → synthetic artifacts validated against it. **Constructions never set thresholds.** Thresholds derive only from the panel; a synthetic passage that disagrees with the numbers is wrong by definition and regenerated. This is what keeps the rejected design #1 rejected while still making every stored artifact synthetic.
+- **Open statistical diff (`scripts/tic_finder.py`, Component 4a):** pooled arm-B outputs vs. pooled exemplars, ranked by log-odds over-representation (words, n-grams, punctuation, sentence openings, sentence shapes). No pre-named columns; a new tic surfaces as an over-representation. *Proven:* Opus-4.8 arm-A × 12 briefs pooled surfaced dash-overuse, spaced-dash, colon-led elaboration, and formulaic openings — known current-gen syntactic tics, discovered not recalled.
+- **Holistic judge diff (`scripts/run_judge.py`, Component 5 — the PRIMARY detector):** the judge reads both responses to the same brief and enumerates every systematic difference in *how* they are written — not "which is the machine." Finds tics at any N (no pooling needed). Built and verified; supports multiple samples per brief with two-level recurrence (a tic must recur across samples of a brief AND across briefs). It is now the headline detector; `tic_finder.py` is a backward-looking secondary cross-check.
+- **Known-tic regression (`scripts/measure_density.py`, Component 4b):** the named metrics, run against outputs and (when present) envelopes to confirm/retire current backstop entries.
 
-**Judge-metric consequence:** with foils instead of human samples, "detectability vs. humans" is no longer the headline. The harvest headline becomes **envelope deviation** (per-metric distance of arm-B outputs from the human envelope — counting-based and more robust). The judge contributes the **giveaway tally** (its real product) and a secondary foil-discrimination rate. Known residual: a foil's *unmeasured* dimensions carry its generator's signature, so some giveaways may point at the foil generation rather than the target — mitigated by the cross-generation rule and by human review of the tally; anything real it surfaces becomes a candidate metric for the next identification pass.
+**Grounding invariant:** real writing remains the arbiter. A candidate from any diff enters `candidates.md` only after a **confirmation check against real writing** — if the pattern occurs at comparable rates in excellent human prose (the panel, optional fingerprints, or a fresh check), it is craft, not tic. Synthetic exemplars are the *instrument* of comparison, never the *authority* for what counts as human.
+
+**Named blind spot (measured + mitigated 2026-07-18):** a tic shared by the exemplar generator and the target cancels out of the task-matched diff. This was measured, not just feared — the v1 exemplars carried an em-dash tic at 2.94/250w against a human-corpus baseline of 0.67. The `v2-learn-decisions` generation instruction cut it to 1.35/250w without naming any tic. Residual risk persists at the punctuation level (still above human), so for punctuation-level tics use the `sources/` human corpus as the baseline, not the exemplars, and always run the human corpus as a control before treating a raw count as a finding. Coverage: the blind judge (never sees provenance), the external-signal detector (Component 6), the cross-generation guard, and grounding against real writing. **Optional future enrichment** (`baseline/fingerprints/`, `baseline/craft/`) would add a second, real-writing diff reference immune to exemplar-generator contamination; on the roadmap, not the critical path.
 
 ---
 
@@ -165,47 +191,67 @@ The replacement splits the two jobs:
 
 Every prompt runs against **each model in the current deployment-target set**, in **two arms**:
 
+Each brief carries its own prompt and, where the register needs it, its own
+substrate (in `core.jsonl`); there is no single shared fixed context card.
+
 | Arm | System prompt | Purpose |
 |---|---|---|
-| **A — control** | Context card only, no S0 | Measures the raw signature; also the denominator for gate effectiveness |
-| **B — gates-only** | Context card + S0 core (no backstop) | The primary corpus: what leaks through the gates is the backstop's job |
+| **A — control** | no guardrail modules (brief + its own substrate only) | Measures the raw signature; also the denominator for gate effectiveness |
+| **B — gates-only** | S0 core (no backstop) | The primary corpus: what leaks through the gates is the backstop's job |
 
 Same harness, same order, fresh context per prompt. Arm B minus arm A is the **gate-effectiveness** measure — a free health check on S0 core itself. If a tic is equally dense in both arms, the gates never touched it; if the gates suppress it, it may not need a backstop entry at all.
 
-### Context card (frozen, in `battery/context-card.md`)
+> **Superseded 2026-07-17.** The original v1 battery — a frozen single-org
+> promotional set (Harbor Bend Community Land Trust context card + 12 prompts
+> F01–F12, all one org, all evaluative/promotional register) — was **retired.**
+> A single org in one register can only surface tics *within that genre*, and the
+> first real run confirmed it: the top non-known "discoveries" were donor-appeal
+> genre artifacts, not model tics. The current battery organizes by
+> **domain/register** instead, so the register is the stimulus and the judge names
+> whatever the model overdoes. The subsections below are kept only as the record of
+> what was replaced and why; the live battery spec is authoritative.
 
-A one-page fact sheet for a fictional organization — **Harbor Bend Community Land Trust** (community land trust, founded 2011, 3 staff + 40 volunteers, 62 permanently affordable homes stewarded, a youth-stewardship program, a modest verified outcome set: resident tenure lengths, resale-formula outcomes, one program that was paused and why). The card exists so outputs have real facts to work with — which also exercises the Earn Every Claim gate honestly. All numbers are invented once and frozen; comparability requires the card never change.
+**The current battery** (source of truth: `battery/core.jsonl`; design:
+`battery/COVERAGE_SPEC.md`): 31 briefs across **8 registers** — analytical,
+technical, narrative, news, terse, correspondence, reasoning, adversarial. Every
+brief is tagged `[invented]` (writing-without-priors) or `[real]` (writing-with-
+priors / trained-data recall), and carries its own prompt plus, where the register
+needs one, its own substrate — there is no single shared context card. It is a
+**stable core + growing pool**: the core recurs every harvest for longitudinal
+comparability, and registers/briefs are added as coverage gaps surface (a
+discovery instrument needs room for an unnamed tic to appear). Multiple samples
+per brief per arm (default 3) so a tic must recur across samples, not just briefs.
 
-### Fixed core — F01–F12 (frozen)
+<details><summary>Retired v1 battery (Harbor Bend F01–F12) — historical record</summary>
 
-Genres chosen because they reliably elicit evaluative/promotional prose — the tic-richest register:
+The v1 battery was a one-page fact sheet for a fictional **Harbor Bend Community
+Land Trust** plus 12 frozen prompts (About page, case study, donor appeal,
+newsletter, blog opening, board comparison, exec summary, program page, LinkedIn
+post, bio, FAQ, partner email) and a rotating pool (event invitation, op-ed, grant
+narrative, etc.). All one org, all promotional register. Retired because that
+scope structurally cannot distinguish a model tic from a genre convention. See
+`[[harvest-battery-purpose]]`.
 
-| ID | Genre | Format target | Prompt (abbreviated; full text in `battery/core.md`) |
-|---|---|---|---|
-| F01 | About page | Web prose | "Write the About page for Harbor Bend's website. ~350 words." |
-| F02 | Case study | Long-form prose | "Write a case study on the Alder Street acquisition using the facts in the context card. ~600 words." |
-| F03 | Donor appeal | Letter | "Write the year-end donor appeal letter from the executive director. ~400 words." |
-| F04 | Newsletter lead | Email prose | "Write the lead article for the quarterly newsletter covering the youth-stewardship program's second cohort. ~350 words." |
-| F05 | Blog opening | Editorial prose | "Write the first 300 words of a blog post arguing that permanent affordability beats subsidized rent. For a general audience." |
-| F06 | Comparison | Analytical prose | "Write a passage for the board comparing the resale-formula model with deed-restriction-only approaches. ~400 words." |
-| F07 | Executive summary | Report prose | "Write the executive summary of Harbor Bend's annual report. ~300 words." |
-| F08 | Program page | Web prose | "Write the program page for the youth-stewardship program. ~300 words." |
-| F09 | LinkedIn post | Social | "Write a LinkedIn post announcing the 62nd home entering the trust. ~150 words." |
-| F10 | Bio | Short-form | "Write a 150-word bio for the founding director for a conference program." |
-| F11 | FAQ | Q&A prose | "Answer these three FAQ questions for the website: How is this different from a co-op? What happens when I sell? Who qualifies?" |
-| F12 | Partner email | Correspondence | "Write an email to a prospective funder introducing Harbor Bend and requesting a meeting. ~250 words." |
-
-### Rotating pool — R01+ (4 per harvest, rotated)
-
-Event invitation; op-ed opening; grant-narrative excerpt; volunteer recruitment page; response statement to critical local-press coverage; podcast episode description; impact-report narrative section; landing-page hero + subhead. New pool prompts may be added over time; **the core is frozen** — longitudinal comparability lives there.
-
-**Battery size per harvest:** 16 prompts × 2 arms × N target models. At ~500 words average output this is a trivially cheap generation job; the cost center is review time, not tokens.
+</details>
 
 ---
 
-## Component 4 — Statistical detection (the counting layer)
+## Component 4 — Statistical detection: open diff (discovery) + known-tic regression
 
-Measured per output, aggregated per (model, arm). Immune to model self-blindness because it is arithmetic. All thresholds below are **provisional defaults — the first identification pass replaces them with per-genre envelopes measured from the panel** (TODO: replace after the first pass).
+Two statistical layers with different jobs. Both are arithmetic, immune to model self-blindness.
+
+### 4a — Open differential analysis (the discovery layer)
+
+No pre-named metrics. Pooled per (model, genre), compute over-representation rankings (log-odds or log-likelihood keyness) of arm-B outputs against two references:
+
+1. **Task-matched:** the pooled exemplars for the same prompts — differences attributable purely to *how it's written*.
+2. **Genre-level:** the Layer-1 fingerprints from real writing — immune to exemplar-generator contamination.
+
+Feature spaces, deliberately generic: unigrams/lemmas, bigrams/trigrams, all punctuation marks, sentence-length and paragraph-shape distributions, sentence-opening patterns, formatting elements. **Discovery rule:** a feature over-represented in both comparisons (or strongly in one with judge corroboration), recurring across prompts, is a candidate — named by a human at compile time, not pre-named by the instrument.
+
+### 4b — Known-tic regression (the confirmation layer)
+
+The named metrics below, measured per output against the per-genre envelopes in `metrics-baseline.json`. Their job is **confirming and retiring existing backstop entries** and placing thresholds for newly admitted ones — not discovery; a pattern must already be named to have a row here. Every admitted backstop entry gets a regression metric; retired entries keep theirs (retirement is reversible). Thresholds below are provisional until measured envelopes replace them.
 
 | Metric | Definition | Flag when (provisional) |
 |---|---|---|
@@ -222,25 +268,24 @@ Measured per output, aggregated per (model, arm). Immune to model self-blindness
 | `sentence_length_cv` | Coefficient of variation of sentence length (burstiness — humans higher) | ≤ 0.75× baseline |
 | `paragraph_uniformity` | Std-dev of paragraph length (models produce eerily uniform paragraphs) | ≤ 0.5× baseline |
 
-**Candidate rule:** a metric flags as a backstop candidate when it exceeds threshold in ≥ 60% of arm-B outputs for a model. Phase 1 counts by hand/agent-assisted; Phase 2 implements `measure_density.py` (plain Python, no external deps, same convention as `build-deploy-bundles.py`).
+**Regression rule:** a known metric flags when it exceeds threshold in ≥ 60% of arm-B outputs for a model. Tooling: `scripts/measure_density.py` covers 4b today; 4a's keyness pass is agent-assisted in Phase 1 and gets a script in Phase 2.
 
 ---
 
-## Component 5 — Blind judge protocol
+## Component 5 — Judge protocol: same-brief differential reading
 
-Catches pattern-level tics the counters don't have a regex for.
+The open *qualitative* detector — catches pattern-level differences neither statistical layer can represent (structural moves, emphasis habits, how evidence is deployed).
 
-- **Pairing.** Each arm-B output is paired with a genre- and length-matched **synthetic foil** from `baseline/constructions/foils/` — envelope-constrained, generated by a different model generation than the harvest target, counter-validated before use. (See "Reference architecture" above; human samples are measured for the envelope, never stored as pairing material.)
-- **Judge.** A model from a *different generation* than the generator, fresh context, no S0 loaded. Cross-generation judging partially defeats shared blindness; the statistical layer covers the rest. (TODO: pick the judge model per harvest; record it in the report.)
-- **Presentation.** Randomized A/B order, no provenance metadata.
+- **Pairing.** Each arm-B output is paired with the **exemplar for the same battery prompt** (`baseline/exemplars/<prompt-id>/`). Same brief, same facts — the comparison is purely about the writing.
+- **Judge.** The **most capable analytic model available** at harvest time, chosen on merit (the judge does hard analytic work) — *not* selected merely for being a different generation. *(Revised 2026-07-17 — superseded the earlier "different generation than target and exemplar generator" framing.)* Fresh context per pair, no S0 loaded. No "latest" alias exists — record the pinned model id in the report; if the judge equals the target model, note that overlap as a weaker independent check.
+- **Presentation.** Randomized A/B order, no provenance metadata; the judge is not told which is which.
 - **Judge prompt (template):**
 
-  > One of these two passages was written by a person, one by an AI model. 1) Which is the model's, A or B? 2) Confidence (low/medium/high). 3) List the specific features that gave it away — quote the exact phrases or describe the exact constructions. 4) List any features that made the *other* passage feel human.
+  > These are two responses to the same brief, working from the same fact sheet. Compare **how they are written**, not what they say. 1) Enumerate every systematic difference in the writing — structure, rhythm, sentence and paragraph shapes, word choice, emphasis habits, formatting, how evidence is used. Quote exact phrases for each. 2) For each difference, name which passage does it. 3) If either passage shows patterns that read as *generated habits imposed on the content* rather than choices serving it, name them specifically.
 
-- **Outputs.** Two numbers and one list:
-  - **Detectability rate** — % of pairs correctly identified. This is the harvest's headline number and the long-term trend line. If judges can't beat chance against gates-only output, the gates alone are sufficient and the backstop can shrink.
-  - **Gate effectiveness** — detectability of arm B vs. arm A.
-  - **Giveaway tally** — the "what gave it away" answers, clustered. A giveaway mentioned across ≥ 3 pairs is a candidate.
+- **Outputs.**
+  - **Difference tally** — differences clustered across pairs, each tagged with its direction (target-side vs. exemplar-side). A target-side difference recurring across ≥ 3 pairs is a candidate. An *exemplar-side* recurring pattern is exemplar feedback or the exemplar generator's signature — reviewed either way, never silently dropped.
+  - **Gate effectiveness** — arm A vs. arm B difference volume and severity: which patterns the gates suppressed, which passed untouched.
 
 ---
 
@@ -256,10 +301,11 @@ An agentic web-research pass at harvest time, because the freshest tic catalogs 
 
 ## Component 7 — Compilation, review, release
 
-1. **Compile `candidates.md`:** one row per candidate — pattern, statistical evidence (metric, delta vs. baseline, % of outputs), judge mentions, external citations, 2–3 example excerpts, proposed threshold + remedy, proposed action (add / amend / retire / no action).
-2. **Admission rule:** ≥ 2 of 3 detectors corroborate. **Retirement rule:** an existing entry with no leakage in two consecutive harvests is proposed for retirement (its metric stays in the counter set — retirement is reversible).
-3. **Human review:** Chris (or designated reviewer) accepts/prunes per row. The reviewer's specific judgment calls: is this overuse or legitimate technique at observed density? Is the threshold right? Does the remedy point back to the right gate?
-4. **Release:** update `modules/S0_backstop.md`, changelog entry, tag `s0-backstop-vX.Y.Z`. Libraries adopt by `--update-guardrails S0_BACKSTOP=<version>` on their own schedule.
+1. **Compile `candidates.md`:** one row per candidate — pattern (human-named at compile time for open-diff discoveries), evidence (over-representation stats and/or regression delta, judge mentions with direction, external citations), 2–3 example excerpts, proposed threshold + remedy, proposed action (add / amend / retire / no action).
+2. **Grounding check before admission:** every discovered candidate is confirmed against the real examples — via the fingerprints, or by re-fetching cited panel texts. A pattern occurring at comparable rates in the collected excellent writing is craft, not tic: rejected. Real writing is the arbiter; exemplars are only the instrument.
+3. **Admission rule:** ≥ 2 of 3 detectors corroborate (open statistical diff and known-tic regression count as one detector family — statistical). **Retirement rule:** an existing entry with no leakage in two consecutive harvests is proposed for retirement (its regression metric stays in the counter set — retirement is reversible).
+4. **Human review:** Chris (or designated reviewer) accepts/prunes per row. The reviewer's specific judgment calls: is this overuse or legitimate technique at observed density? Is the threshold right? Does the remedy point back to the right gate?
+5. **Release:** update `modules/S0_backstop.md` (each newly admitted entry gains a 4b regression metric), changelog entry, tag `s0-backstop-vX.Y.Z`. Libraries adopt by `--update-guardrails S0_BACKSTOP=<version>` on their own schedule.
 
 ---
 
@@ -271,16 +317,22 @@ An agentic web-research pass at harvest time, because the freshest tic catalogs 
 # Prose-Signature Harvest — <models>, <date>
 
 ## Headline
-- Detectability rate (gates-only): X% (prior harvest: Y%)
-- Gate effectiveness: control X% → gates-only Y%
+- Discovered: N new candidate patterns (open diff X, judge Y, external Z);
+  K survived the grounding check and review
+- Known-tic regression: [entries confirmed / moved toward retirement / drifted]
+- Gate effectiveness: [what the gates suppressed vs. passed, arm A → arm B]
 - Backstop: N entries added, M retired → s0-backstop-vX.Y.Z
 
 ## What this generation sounds like
 [2–4 paragraphs: the signature in plain language, with excerpts.
 What changed from the previous generation and the likely why.]
 
-## Metric table
-[All Component-4 metrics: baseline / control / gates-only / prior harvest]
+## Discovery findings
+[Top over-representations from the open diff (4a), each with its grounding-
+check result; the judge's recurring differences with direction.]
+
+## Known-tic regression table
+[All 4b metrics: envelope / control / gates-only / prior harvest]
 
 ## What the gates caught and missed
 [Arm A vs. B — which tics the gates suppress, which pass through untouched.
@@ -332,14 +384,16 @@ A recurring agentic run (scheduled agent or skill invocation) that executes batt
 | Risk | Mitigation |
 |---|---|
 | Baseline contamination (humans writing like models) | Panel texts verifiably pre-2023, provenance recorded; envelope re-derivation is a versioned event |
-| Synthetic constructions drifting into threshold authority | One-way flow invariant: thresholds derive only from the measured panel; constructions are counter-validated artifacts, regenerated when they disagree with the numbers |
-| Battery overfit (gates/backstop tuned to the bait) | Frozen core for comparability + rotating minority for coverage; genres, not phrasings, are what the battery fixes |
+| Exemplars drifting into authority over what counts as human | Grounding invariant: every discovered candidate is confirmed against real examples before admission; exemplars are the comparison instrument, never the arbiter |
+| Shared tics between exemplar generator and target cancel out of the task-matched diff | Fingerprint-level diff against real writing + external signal + cross-generation exemplar production; exemplar-side judge findings reviewed, never dropped |
+| Discovery layer quietly regressing into a fixed metric list | "Discovery over confirmation" principle: 4a runs on open feature spaces; named metrics live only in 4b as regression |
+| Battery overfit (gates/backstop tuned to the bait) | Stable core for comparability + growing pool for coverage; registers, not phrasings, are what the battery fixes — the register is the stimulus, the judge names the tic |
 | Banlist growth outlawing ordinary English | 25-entry/~700-token cap; threshold phrasing; evidence admission rule; retirement rule; human review |
 | Judge shares generator's blindness | Cross-generation judging + the statistical layer (which has no blindness) + external signal |
 | Provisional Phase-0 entries treated as measured | Explicitly marked provisional in the backstop until first harvest confirms |
 | Stale libraries never adopt updates | `--check` upstream-newer notice; adoption stays deliberate per pinning philosophy |
 | Scope creep into general model evals | Harvest contract is prose signature only; behavioral evals (the skill-audit K-5 item) are a separate artifact that may share the harness later |
-| Fictional-org facts drift | Context card frozen; any change is a battery major version and breaks trend comparability — don't |
+| `[real]`-brief facts drift or provoke hallucination | Exemplars fact-verified before promotion; the judge is form-only by design (a hallucination leaves a stylistic fingerprint the judge catches without fact-checking) — see `[[harvest-battery-purpose]]` |
 
 ---
 

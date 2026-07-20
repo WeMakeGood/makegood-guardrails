@@ -129,6 +129,49 @@ Conditional module — loaded by external-facing agents only.
 
 ## s0-backstop — S0 Revision Backstop (current-generation prose signature)
 
+### [1.1.0] — 2026-07-20 — first harvest-measured revision
+
+First revision driven by measurement rather than recollection. Source: the first
+real judge pass (Opus 4.8 + Sonnet 5, both arms, 3 samples/brief, 372 outputs;
+`reports/2026-07-opus48-sonnet5/`). Admission this generation = the blind judge
+(primary) + the human-baseline **degree** control (`measure_density.py` vs the
+`sources/` human corpus). tic_finder is **not** in the admission logic
+(backward-looking; reviewer steer 2026-07-20).
+
+**Module is now a clean compiled artifact.** The backstop body splices verbatim
+into the model's write-time context, so it carries no status tags, no per-harvest
+evidence, and no illustrative bad examples (describing a tic in-context primes it).
+All lifecycle state and evidence moved to `harvest/BACKSTOP_TRACKER.md`, which
+compiles down to the ACTIVE rows shipped here.
+
+Changes (status/evidence tracked in `BACKSTOP_TRACKER.md`):
+- **Em-dash chaining → em-dash overuse.** Re-specified to the construction that
+  actually leaks — the appositive/aside dash — and confirmed at **3–4× the human
+  rate** (57–75% of outputs above the human p90); S0's prior remedy did not bite
+  on Sonnet. Remedy sharpened per construction. Stated as degree, not presence
+  (humans and the exemplars use dashes too).
+- **Bolded lead-ins → chat-shape formatting.** Broadened to add the two other
+  measured formatting leaks — markdown **headers** and argument-carrying **bulleted
+  lists** (human p90 = 0 in prose registers). S0 core's Medium's-Shape gate already
+  suppresses most; the entry catches the residue.
+- **Triadic rhythm** and **contrast-negation scaffolding** → **RETIRE-TRACK.**
+  Measured at/below the human rate (triadic at 0.4–0.8×; humans use triads *more*).
+  No leakage, 1 of 2 harvests; a second clean harvest retires them per the
+  two-harvest rule.
+- **Signposting** and **hedging closers** → **METRIC-PENDING.** The judge sees both
+  recurring (hedging as mid-sentence qualifier-stacking; signposting as
+  topic-sentence labels), but the current arithmetic metrics can't quantify the
+  degree, so they can't be calibrated this pass. Confirmed patterns, uncalibrated;
+  new metrics needed before the next harvest.
+- **Punch fragments** kept provisional — `fragment_rate` is still stubbed in
+  `measure_density.py`, so this pass could neither confirm nor reject it.
+- **Vocabulary lists** carried **unmeasured** — this harvest measured structure,
+  not the word lists.
+
+Entry count 10 (7 syntactic incl. 2 retire-track + 3 vocabulary), well under the
+25-entry cap. Report + candidate table: `reports/2026-07-opus48-sonnet5/`
+(`REPORT.md`, `candidates.md`).
+
 ### [1.0.0] — 2026-07-15 — seeded
 
 New artifact created by the S0 2.0.0 split. Spliced into vendored S0 between

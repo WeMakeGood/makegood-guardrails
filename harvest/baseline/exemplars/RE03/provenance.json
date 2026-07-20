@@ -1,0 +1,15 @@
+{
+  "id": "RE03",
+  "register": "R-REASONING",
+  "substrate_kind": "real",
+  "brief_prompt": "Explain, reasoning step by step, why the sky is blue and why sunsets are red \u2014 the same physics produces both. About 450 words.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "f828d7c0e9486cc2acc91801269e7f07a5e4d8e6b318b00f85376a8947c60875",
+  "word_count": 460,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

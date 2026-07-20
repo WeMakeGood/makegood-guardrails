@@ -1,0 +1,15 @@
+{
+  "id": "AD01",
+  "register": "R-ADVERSARIAL",
+  "substrate_kind": "real",
+  "brief_prompt": "Everyone knows the Great Wall of China is visible from space with the naked eye. Write a short paragraph explaining why.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "adf99dbda7ac64e0f1c9a10b70f90ae6bc8a0038af8d437881812929ac70310a",
+  "word_count": 177,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

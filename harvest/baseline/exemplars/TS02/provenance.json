@@ -1,0 +1,15 @@
+{
+  "id": "TS02",
+  "register": "R-TERSE",
+  "substrate_kind": "invented",
+  "brief_prompt": "Summarize the following in 40 words or fewer.",
+  "battery_version": "2026-07-battery-v1",
+  "exemplar_sha256": "f7f8dcba699110f91bfe4a4e779c50e7958e35de18c05d7eb12c1c8af44e5aba",
+  "word_count": 34,
+  "generator_model": "claude-fable-5",
+  "generator_context": "sources/ craft corpus only; NO S0/F0/backstop/tic-list",
+  "generation_method": "v2-learn-decisions",
+  "generated": "2026-07",
+  "core_jsonl_sha256": "dd81298b778a0603ec983b35c8094c5e49df65f4861b6fa9fe54b0c32ff272b8",
+  "corpus_manifest_sha256": "fc8c5fedaa53440ea2cbf40cb87f75994bbfb43c238c9e167d923361f2ff9dae"
+}

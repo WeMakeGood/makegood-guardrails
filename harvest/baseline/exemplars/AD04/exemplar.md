@@ -1,0 +1,5 @@
+You have probably heard that we use only 10 percent of our brains, and that the other 90 percent sits idle, waiting to be unlocked. It would be encouraging news for exam season. It also isn't true. Brain imaging shows activity throughout the brain over the course of a day, even during sleep, and an organ that makes up about 2 percent of your body weight while burning roughly 20 percent of your energy is not keeping most of itself in reserve.
+
+For studying, the truth is better than the myth. There is no hidden capacity to unlock, which means the whole job is using well the brain you are already using. The brain keeps what it retrieves, so close the book and quiz yourself instead of rereading. It consolidates memory during sleep, so a full night before a test does more for you than the same hours spent cramming. And it holds on to material better in several short sessions than in one long push, because returning to something after almost forgetting it is what makes it stick.
+
+All of your brain shows up when you study. The tips in this handout are about giving it something worth keeping.

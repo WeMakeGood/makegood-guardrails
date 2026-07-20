@@ -1,2 +1,19 @@
 .DS_Store
 *.swp
+
+# Local credentials — never commit. Real key goes in .env.local (untracked);
+# .env.local.example is the committed template with no secret.
+.env.local
+.env
+*.key
+
+# Local Python virtualenv for the harvest scripts' optional API path
+.venv/
+__pycache__/
+*.pyc
+
+# Third-party source corpus — body text for internal craft-study only, never committed
+sources/
+
+# Harvest run artifacts — transient outputs, regenerated per harvest
+reports/

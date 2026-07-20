@@ -1,0 +1,1 @@
+A company is recalling 12,000 space heaters because a wiring fault can cause them to overheat. No injuries have been reported. Owners should stop using the heaters and contact the company for a refund.
