@@ -67,8 +67,18 @@ is no single shared fixed context card.
 
 ## H3 — Statistical detection: open diff (discovery) + known-tic regression
 
+> **Detector-role note (2026-07-20, reviewer steer).** tic_finder (4a) is **not**
+> in the admission logic — it is a poor comparison for this purpose (keyness
+> against the exemplar mislabels degree differences and content). Admission is the
+> **judge (H4, primary) + the human-baseline degree control** (`measure_density.py`
+> against the `sources/` corpus). The judge names patterns and flags habit-vs-craft;
+> the human corpus decides whether the *rate* is overuse (em-dash is a matter of
+> degree, not presence — humans and the exemplars both use dashes). Run 4a if you
+> like as a sanity artifact, but a candidate stands on judge + degree control, not
+> on tic_finder agreement.
+
 - [ ] **Preprocess identically to the panel:** strip non-prose scaffolding before any measurement (the rule in `baseline/README.md §1`; `scripts/extract_body.py`). The same rule must govern panel texts, exemplars, and battery outputs, or nothing is comparable.
-- [ ] **4a — open diff (the discovery layer):** run `scripts/tic_finder.py --target-dir <outputs> --exemplar-dir baseline/exemplars --pooled`. It ranks the features arm-B outputs **over-represent** vs the task-matched exemplars (log-odds keyness on words, n-grams, punctuation, sentence openings, sentence shapes) — no predefined tic list, so unnamed tics can surface. Pool per model (single short pairs are underpowered). Write ranked findings to `reports/<id>/diff-findings.md`. **Discovery rule:** a feature strongly over-represented, recurring across prompts, is a candidate — named by a human at compile time. Content-word hits are noise; the human names structural/stylistic candidates. (Enrichment: if `fingerprints/<genre>.json` exists, diff against it too as a second, real-writing reference.)
+- [ ] **4a — open diff (artifact only, see note above):** run `scripts/tic_finder.py --target-dir <outputs> --exemplar-dir baseline/exemplars --pooled`. It ranks the features arm-B outputs **over-represent** vs the task-matched exemplars (log-odds keyness on words, n-grams, punctuation, sentence openings, sentence shapes) — no predefined tic list, so unnamed tics can surface. Pool per model (single short pairs are underpowered). Write ranked findings to `reports/<id>/diff-findings.md`. **Discovery rule:** a feature strongly over-represented, recurring across prompts, is a candidate — named by a human at compile time. Content-word hits are noise; the human names structural/stylistic candidates. (Enrichment: if `fingerprints/<genre>.json` exists, diff against it too as a second, real-writing reference.)
 - [ ] **4b — known-tic regression:** measure the named metrics per output with `scripts/measure_density.py`; compare against `metrics-baseline.json` envelopes. Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`. **Regression rule:** a known metric flags in ≥ 60% of arm-B outputs → the corresponding backstop entry is confirmed; entries with no leakage move toward retirement.
 - [ ] Control check the 4b suite both directions (if controls exist): every metric must **fire** on `constructions/negative/` and stay **silent** on `constructions/positive/`. A metric failing either is broken or mis-thresholded; fix before trusting its numbers.
 

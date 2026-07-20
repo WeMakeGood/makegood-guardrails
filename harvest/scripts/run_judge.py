@@ -75,7 +75,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-SCRIPT_VERSION = "0.2.0"  # 0.2.0: multi-sample per brief + two-level recurrence tally
+SCRIPT_VERSION = "0.3.0"  # 0.3.0: batched two-pass LLM clustering (scales past ~200 labels)
+# 0.2.0: multi-sample per brief + two-level recurrence tally
 
 # The differential-reading prompt. Kept verbatim in sync with HARVEST.md H4 — if
 # one changes, change both. The judge compares two responses to the SAME brief
@@ -347,6 +348,56 @@ Labels to group:
 """
 
 
+# A real judge produces ~1000 distinct labels per arm. One clustering call must
+# RESTATE every label it groups, so the reply scales with the input; past a few
+# hundred labels it blows the output budget (the 2026-07 first run hit exactly
+# this at ~1000 labels). So clustering is batched: group each batch of labels,
+# then a second pass consolidates the batches' family NAMES (far fewer than the
+# raw labels) into final families. Batch size is the labels-per-call ceiling
+# that stays safely inside CLUSTER_MAX_TOKENS.
+_CLUSTER_BATCH = 200
+_CLUSTER_MAX_TOKENS = 16000
+
+
+def _cluster_call(client, model, instruction, items):
+    """One clustering call. Returns the parsed {"families":[...]} object, or None
+    if the reply is unusable (truncated or malformed JSON).
+
+    Clustering is an ENRICHMENT pass, not the detector — its labels contain the
+    very punctuation they describe (em-dashes, quotes, brackets), so a batch
+    occasionally comes back as malformed JSON. A bad batch must NOT abort the
+    whole tally: the caller degrades by leaving that batch's labels ungrouped
+    (they still appear in the always-emitted raw-by-family safety net). Returning
+    None instead of raising is what makes that graceful degradation possible.
+    """
+    prompt = instruction.format(
+        schema=json.dumps(_CLUSTER_SCHEMA, ensure_ascii=False, indent=2),
+        labels="\n".join(f"- {it}" for it in items))
+    # Clustering is mechanical grouping, not deep analysis — no extended thinking
+    # (adaptive thinking here spent the whole budget reasoning and emitted no text).
+    msg = client.messages.create(
+        model=model, max_tokens=_CLUSTER_MAX_TOKENS, thinking={"type": "disabled"},
+        messages=[{"role": "user", "content": prompt}])
+    raw = "".join(b.text for b in msg.content
+                  if getattr(b, "type", None) == "text").strip()
+    if msg.stop_reason == "max_tokens":
+        print(f"# clustering: batch of {len(items)} hit max_tokens; leaving it "
+              f"ungrouped (lower _CLUSTER_BATCH to group it)", file=sys.stderr)
+        return None
+    start, end = raw.find("{"), raw.rfind("}")
+    if start == -1 or end <= start:
+        print(f"# clustering: batch of {len(items)} returned no JSON object "
+              f"(stop_reason={msg.stop_reason}); leaving it ungrouped",
+              file=sys.stderr)
+        return None
+    try:
+        return json.loads(raw[start:end + 1])
+    except json.JSONDecodeError as e:
+        print(f"# clustering: batch of {len(items)} returned malformed JSON "
+              f"({e}); leaving it ungrouped", file=sys.stderr)
+        return None
+
+
 def _cluster_features(labels: list[str], model: str) -> dict[str, str]:
     """LLM clustering pass: map each raw feature label -> canonical family name.
 
@@ -354,44 +405,66 @@ def _cluster_features(labels: list[str], model: str) -> dict[str, str]:
     judge's phrasing variance doesn't fragment one tic across many buckets. Sees
     labels only — never sides, pairs, or provenance. Returns {raw_label: family};
     any label the model drops falls back to itself (so nothing is silently lost).
+
+    Batched two-pass (see _CLUSTER_BATCH note): pass 1 groups each batch of raw
+    labels; pass 2 consolidates the batch family NAMES into final families so a
+    tic split across batches still merges. With one batch (<= _CLUSTER_BATCH
+    labels) pass 2 is a no-op and this reduces to the original single call.
     """
     import os
     _load_env_local()
     from anthropic import Anthropic
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise SystemExit("--cluster-model needs ANTHROPIC_API_KEY (see .env.local)")
+    client = Anthropic()
 
     uniq = sorted(set(labels))
-    prompt = _CLUSTER_INSTRUCTION.format(
-        schema=json.dumps(_CLUSTER_SCHEMA, ensure_ascii=False, indent=2),
-        labels="\n".join(f"- {lab}" for lab in uniq))
-    client = Anthropic()
-    # Clustering is mechanical grouping, not deep analysis — no extended thinking
-    # (adaptive thinking here spent the whole budget reasoning and emitted no text,
-    # stopping at max_tokens). Give generous output room: the reply restates every
-    # input label inside the families, so it scales with the label count.
-    msg = client.messages.create(
-        model=model, max_tokens=16000, thinking={"type": "disabled"},
-        messages=[{"role": "user", "content": prompt}])
-    raw = "".join(b.text for b in msg.content
-                  if getattr(b, "type", None) == "text").strip()
-    if msg.stop_reason == "max_tokens":
-        raise SystemExit("clustering response hit max_tokens (truncated JSON) — "
-                         "raise max_tokens in _cluster_features or cluster fewer "
-                         "labels at once")
-    start, end = raw.find("{"), raw.rfind("}")
-    if start == -1 or end <= start:
-        raise SystemExit(f"clustering model returned no JSON object "
-                         f"(stop_reason={msg.stop_reason}, {len(raw)} chars of text)")
-    data = json.loads(raw[start:end + 1])
+    batches = [uniq[i:i + _CLUSTER_BATCH] for i in range(0, len(uniq), _CLUSTER_BATCH)]
+    if len(batches) > 1:
+        print(f"# clustering {len(uniq)} labels in {len(batches)} batches of "
+              f"<= {_CLUSTER_BATCH}, then consolidating families", file=sys.stderr)
 
+    def _absorb(data, into: dict) -> None:
+        """Fold a _cluster_call result into a {norm_member: canonical} map.
+        No-op when data is None (a degraded batch) — its labels stay ungrouped
+        and fall through to the map-to-self step, never lost."""
+        if not data:
+            return
+        for fam in data.get("families", []):
+            canon = (fam.get("canonical") or "").strip()
+            for member in fam.get("members", []):
+                m = (member or "").strip()
+                if m and canon:
+                    into[_norm_feature(m)] = canon
+
+    # Pass 1: raw label -> batch-local family name.
+    label_to_batchfam: dict[str, str] = {}
+    for bi, batch in enumerate(batches):
+        _absorb(_cluster_call(client, model, _CLUSTER_INSTRUCTION, batch),
+                label_to_batchfam)
+        if len(batches) > 1:
+            print(f"#   batch {bi + 1}/{len(batches)} done", file=sys.stderr)
+
+    # Pass 2: consolidate the batch-local family names into final families.
+    # Operates on the (much smaller) set of family names, so it fits one call.
+    batchfams = sorted(set(label_to_batchfam.values()))
+    batchfam_to_final: dict[str, str] = {}
+    if len(batches) > 1 and len(batchfams) > _CLUSTER_BATCH:
+        # Rare: even the family names exceed a batch. Consolidate them in batches
+        # too (one level is enough in practice — names are already near-canonical).
+        for i in range(0, len(batchfams), _CLUSTER_BATCH):
+            _absorb(_cluster_call(client, model, _CLUSTER_INSTRUCTION,
+                                  batchfams[i:i + _CLUSTER_BATCH]), batchfam_to_final)
+    elif len(batches) > 1:
+        _absorb(_cluster_call(client, model, _CLUSTER_INSTRUCTION, batchfams),
+                batchfam_to_final)
+
+    # Compose: raw label -> batch family -> final family.
     mapping: dict[str, str] = {}
-    for fam in data.get("families", []):
-        canon = (fam.get("canonical") or "").strip()
-        for member in fam.get("members", []):
-            m = (member or "").strip()
-            if m and canon:
-                mapping[_norm_feature(m)] = canon
+    for norm_label, batchfam in label_to_batchfam.items():
+        final = batchfam_to_final.get(_norm_feature(batchfam), batchfam)
+        mapping[norm_label] = final
+
     # Any label the clusterer dropped maps to itself — never silently lost.
     dropped = [lab for lab in uniq if _norm_feature(lab) not in mapping]
     if dropped:
@@ -681,10 +754,11 @@ def _print_tally(judgdir, key, prepared, judged, min_samples, min_briefs,
 
     print(f"\n{'-'*66}")
     print("Candidates, not verdicts. A target-side recurrence is a candidate for")
-    print("the compile step (H6): a human names it, grounding-checks it against")
-    print("real human writing, and corroborates against tic_finder.py before it")
-    print("can reach the backstop. Cross-check these against diff-findings.md —")
-    print("agreement between the two detectors is the strongest admission signal.\n")
+    print("the compile step (H6): a human names it, then grounds it against real")
+    print("human writing (the sources/ corpus via measure_density.py). The judge")
+    print("names a pattern and flags habit-vs-craft; it does NOT quantify degree —")
+    print("the human-baseline degree control decides whether the rate is overuse")
+    print("before anything reaches the backstop.\n")
 
 
 # ---------------------------------------------------------------------------

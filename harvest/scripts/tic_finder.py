@@ -199,9 +199,16 @@ def main() -> int:
         matched = []
         for tgt in sorted(args.target_dir.glob("*.md")):
             pid = tgt.stem
-            ex = args.exemplar_dir / pid / "exemplar.md"
+            # Multi-sample outputs are <brief>.<NN>.md (e.g. AN04.02); every
+            # sample of a brief pairs against that brief's single exemplar. Strip
+            # an all-digits trailing suffix to recover the brief id (mirrors
+            # run_judge.py's _brief_of). A plain <brief>.md still maps to itself.
+            head, _, tail = pid.rpartition(".")
+            brief = head if head and tail.isdigit() else pid
+            ex = args.exemplar_dir / brief / "exemplar.md"
             if not ex.exists():
-                print(f"# no exemplar for {pid}, skipping", file=sys.stderr)
+                print(f"# no exemplar for {brief} (sample {pid}), skipping",
+                      file=sys.stderr)
                 continue
             matched.append((pid, tgt, ex))
         if not matched:

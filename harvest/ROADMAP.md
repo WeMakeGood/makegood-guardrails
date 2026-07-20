@@ -53,21 +53,32 @@ Design rationale lives in `../HARVEST_PLAN.md`; the operator checklist in
 
 ## Next, in priority order
 
-### 1. First judge run — exercise `run_judge.py` against real pairs
+### 1. First judge run — DONE 2026-07-20 (`reports/2026-07-opus48-sonnet5/`)
 
-**Why first.** The blind-judge harness is built but has only been run on a
-synthetic fixture. Its first real job is to corroborate (or challenge)
-`tic_finder.py`'s existing dash/colon/opening findings on the Opus-arm-A ×
-exemplar pairs — the two detectors agreeing is the strongest admission signal.
+Ran end-to-end: Opus 4.8 + Sonnet 5, both arms, 3 samples/brief (372 outputs →
+372 judgments, 0 failures), judge `claude-opus-4-8`. `dispatch` API path
+exercised live at scale for the first time. See `REPORT.md` + `candidates.md`.
 
-**Do:** run `run_judge.py prepare` on the arm-A outputs, dispatch the packets to a
-most-capable-available judge (via `dispatch`, or an operator running the packets by
-hand), then `tally`. Confirm the differences tally lines up with
-`diff-findings.md`. Exercise the `dispatch` API path once so it's no longer
-untested.
+**Corrected detector logic (reviewer steer, 2026-07-20):** admission is the
+**judge (primary) + the human-baseline degree control** (`measure_density.py`
+against `sources/`). **tic_finder is NOT in the admission logic** — backward-
+looking; its `diff-findings.md` is kept as an artifact only. The judge names a
+pattern and flags habit-vs-craft but does not quantify *degree*; the human corpus
+decides whether the rate is overuse. This run's control rejected two judge-named
+patterns (triadic, contrast-negation) as craft — humans use them at/above the
+target rate — and challenged the matching seeded S0_backstop v1.0.0 entries.
 
-**Done when:** a real judge run produces a difference tally, and the target-side
-candidates are cross-checked against `tic_finder.py`'s.
+**Tooling that this run produced:** `run_judge.py` 0.3.0 (batched clustering +
+graceful degrade on a bad batch — the ~1000-label clustering call blew the output
+budget and one batch/dir returned malformed JSON); `family_rollup.py` (a
+deterministic recount of judge output, reliable where LLM clustering degraded);
+`generate_corpus.py` (API-based, fresh-context, arm-clean generation).
+
+**Remaining follow-through:** the highest-value gap is **metric coverage** —
+hedging, signposting, aphoristic closings, and parentheticals recur in the judge
+output but no arithmetic metric yet quantifies their degree, so they cannot be
+calibrated into backstop thresholds. Build those metrics before the release step
+(H8) admits them.
 
 ### 2. Scale the statistical signal — cheap, compounding
 
