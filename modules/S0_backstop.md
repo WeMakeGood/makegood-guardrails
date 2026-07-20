@@ -12,32 +12,32 @@ provenance: >
   metric-pending status, and worked examples live in harvest/BACKSTOP_TRACKER.md,
   which is compiled down to the ACTIVE rows here at release.
   v1.1.0 = first harvest-measured revision (2026-07-20; Opus 4.8 + Sonnet 5, both
-  arms; reports/2026-07-opus48-sonnet5/). Admission = blind judge + human-baseline
-  degree control (measure_density.py vs the sources/ corpus). Governance: enter on
-  judge + degree-control corroboration; two consecutive clean harvests retire an
-  entry; cap 25 entries / ~700 tokens — past the cap, change a gate in S0 core, not
-  the list. See BACKSTOP_TRACKER.md for status and the harvest log.
+  arms; reports/2026-07-opus48-sonnet5/). The blind judge is the arbiter: it reads
+  the model's samples against the human ideal (the exemplar) and names what recurs
+  as over-style. Density metrics do NOT gate admission — they are cross-harvest
+  tracking + reporting only. Cap 25 entries / ~700 tokens — past the cap, change a
+  gate in S0 core, not the list. See BACKSTOP_TRACKER.md for status + harvest log.
 ---
 
 **These entries are density thresholds, not bans.** Every pattern below is legitimate at a human writer's frequency; the machine signature is overuse. The signal lines describe the density at which the voice has slipped.
 
 **Syntactic patterns** — the current generation's primary signature:
 
-- **Em-dash overuse** — em-dashes past a human frequency, whether as a clause connector, an appositive introducing an elaboration, or a mid-sentence aside set off by a dash pair.
-  Signal: more than ~2 per 250 words, consecutive sentences each carrying one, or a dash standing in for a colon or comma that would do the same work.
-  Remedy: a colon or comma usually reads calmer; for an aside, commas (or parentheses, sparingly); for an elaboration, a full stop and a second sentence. Keep the few that earn the pause.
+- **Em-dash overuse** — em-dashes past a human frequency, as a clause connector, an appositive introducing an elaboration, or a mid-sentence aside in a dash pair.
+  Signal: more than ~2 per 250 words, consecutive sentences each carrying one, or a dash standing in for a colon or comma.
+  Remedy: a colon or comma usually reads calmer; an aside takes commas; an elaboration takes a full stop and a second sentence.
 
-- **Chat-shape formatting** — the interface's native shape in a prose deliverable: bolded lead-in phrases announcing a paragraph, section headers breaking up a letter or essay, and bulleted or numbered lists carrying the argument.
-  Signal: any header, bolded lead-in, or argument-carrying list in a letter, email, or essay; more than a quarter of paragraphs bolded or bulleted anywhere prose is the medium.
-  Remedy: headers become paragraph transitions, bolded lead-ins become topic sentences, bullets become sentences with the connective reasoning restored.
+- **Chat-shape formatting** — the interface's native shape in a prose deliverable: bolded lead-in phrases, section headers breaking up a letter or essay, bulleted or numbered lists carrying the argument.
+  Signal: any header, bolded lead-in, or argument-carrying list in a letter, email, or essay; more than a quarter of paragraphs bolded or bulleted where prose is the medium.
+  Remedy: headers become transitions, bold lead-ins become topic sentences, bullets become sentences with the reasoning restored.
 
-- **Contrast-negation scaffolding** — a negated strawman standing in for the claim ("it's not X, it's Y"; "this isn't about A, it's about B"; "not just X").
-  Signal: more than one instance per ~500 words.
+- **Contrast-negation scaffolding** — a negated strawman standing in for the claim ("it's not X, it's Y"; "this isn't about A, it's about B"), and the negation-triple cadence ("no X, no Y, no Z").
+  Signal: more than one instance per ~500 words; any negation-triple used for rhythm.
   Remedy: state the positive claim directly.
 
-- **Triadic rhythm** — a three-item parallel series as the default structure for description and emphasis.
-  Signal: parallel triples in consecutive sentences, or more than one per paragraph.
-  Remedy: one precise item beats three padded ones; vary series length.
+- **Triadic rhythm** — a three-item parallel series as the default structure for emphasis, and its escalated forms: the tricolon punch closer, the escalating tricolon/quadcolon enumeration.
+  Signal: parallel triples in consecutive sentences, more than one per paragraph, or a tricolon deployed as a closer.
+  Remedy: one precise item beats three padded ones; vary series length; let the point land without the triple.
 
 - **Punch fragments** — sentence fragments deployed for emphasis.
   Signal: more than one per ~500 words.

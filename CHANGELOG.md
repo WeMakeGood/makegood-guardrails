@@ -133,10 +133,13 @@ Conditional module — loaded by external-facing agents only.
 
 First revision driven by measurement rather than recollection. Source: the first
 real judge pass (Opus 4.8 + Sonnet 5, both arms, 3 samples/brief, 372 outputs;
-`reports/2026-07-opus48-sonnet5/`). Admission this generation = the blind judge
-(primary) + the human-baseline **degree** control (`measure_density.py` vs the
-`sources/` human corpus). tic_finder is **not** in the admission logic
-(backward-looking; reviewer steer 2026-07-20).
+`reports/2026-07-opus48-sonnet5/`).
+
+**The blind judge is the arbiter.** It reads the model's samples against the human
+ideal (the exemplar) and names what recurs as over-style; recurrence across samples
+and briefs promotes an observation to a tic. Density metrics do **not** gate
+admission — they are cross-harvest tracking + reporting color only. tic_finder is
+not in the admission logic (backward-looking).
 
 **Module is now a clean compiled artifact.** The backstop body splices verbatim
 into the model's write-time context, so it carries no status tags, no per-harvest
@@ -145,32 +148,29 @@ All lifecycle state and evidence moved to `harvest/BACKSTOP_TRACKER.md`, which
 compiles down to the ACTIVE rows shipped here.
 
 Changes (status/evidence tracked in `BACKSTOP_TRACKER.md`):
-- **Em-dash chaining → em-dash overuse.** Re-specified to the construction that
-  actually leaks — the appositive/aside dash — and confirmed at **3–4× the human
-  rate** (57–75% of outputs above the human p90); S0's prior remedy did not bite
-  on Sonnet. Remedy sharpened per construction. Stated as degree, not presence
-  (humans and the exemplars use dashes too).
-- **Bolded lead-ins → chat-shape formatting.** Broadened to add the two other
-  measured formatting leaks — markdown **headers** and argument-carrying **bulleted
-  lists** (human p90 = 0 in prose registers). S0 core's Medium's-Shape gate already
-  suppresses most; the entry catches the residue.
-- **Triadic rhythm** and **contrast-negation scaffolding** → **RETIRE-TRACK.**
-  Measured at/below the human rate (triadic at 0.4–0.8×; humans use triads *more*).
-  No leakage, 1 of 2 harvests; a second clean harvest retires them per the
-  two-harvest rule.
-- **Signposting** and **hedging closers** → **METRIC-PENDING.** The judge sees both
-  recurring (hedging as mid-sentence qualifier-stacking; signposting as
-  topic-sentence labels), but the current arithmetic metrics can't quantify the
-  degree, so they can't be calibrated this pass. Confirmed patterns, uncalibrated;
-  new metrics needed before the next harvest.
-- **Punch fragments** kept provisional — `fragment_rate` is still stubbed in
-  `measure_density.py`, so this pass could neither confirm nor reject it.
-- **Vocabulary lists** carried **unmeasured** — this harvest measured structure,
-  not the word lists.
+- **Em-dash chaining → em-dash overuse.** Re-specified to the construction the
+  judge found leaking — the appositive/aside dash. (Tracking metric: ~3–4× the
+  human rate; S0's prior remedy did not bite on Sonnet.)
+- **Bolded lead-ins → chat-shape formatting.** Broadened to add the header and
+  bulleted-list leaks the judge flagged. S0 core's Medium's-Shape gate suppresses
+  most; the entry catches the residue.
+- **Triadic rhythm** and **contrast-negation scaffolding** — kept **ACTIVE** and
+  re-specified to the habit shape the judge named (escalating tricolon / tricolon
+  closer; negation-triple cadence). The judge flagged both as generated habits
+  repeatedly (triadic 35×, contrast-negation 18×). *(Corrected an interim draft
+  that had retire-tracked them on an aggregate density number — the metric counted
+  presence, which humans do freely; the judge saw the habit shape, which is the
+  tic. The judge decides, not the metric.)*
+- **Signposting** and **hedging** — **ACTIVE** on the judge's findings (hedging
+  broadened from "closers" to mid-sentence qualifier-stacking; signposting includes
+  topic-sentence labels). Not gated on a metric. *(Corrected an interim draft that
+  parked them as "metric-pending.")*
+- **Punch fragments** and the **vocabulary lists** — **PROVISIONAL**; the 2026-07
+  pass surfaced structural habits and did not put these to a focused judge verdict.
 
-Entry count 10 (7 syntactic incl. 2 retire-track + 3 vocabulary), well under the
-25-entry cap. Report + candidate table: `reports/2026-07-opus48-sonnet5/`
-(`REPORT.md`, `candidates.md`).
+Entry count 10, at the ~700-token cap. **The list is now at capacity** — the next
+admitted tic requires retiring an entry or a gate change in S0 core, per the cap
+rule. Report: `reports/2026-07-opus48-sonnet5/` (`REPORT.md`, `candidates.md`).
 
 ### [1.0.0] — 2026-07-15 — seeded
 
