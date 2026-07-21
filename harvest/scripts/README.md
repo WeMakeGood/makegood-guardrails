@@ -4,29 +4,61 @@ Zero-dependency Python (stdlib only, Python 3.9+), same conventions as
 `build-deploy-bundles.py`. Each is versioned (`--version`) so a harvest report
 can record which code produced its numbers.
 
-The tools form the intake → discovery pipeline for one harvest:
+The tools form the generate → judge → track pipeline for one harvest:
 
 ```
 saved sources ─ scan_sources.py ─▶ triage      (metadata present? guard cleared?)
      │
      └─ extract_body.py ─▶ prose bodies         (strip nav/ads/scaffolding)
+
+battery + exemplars ─ generate_corpus.py ─▶ N samples/brief/arm  (H2: fresh context, arm-clean)
                               │
-        target model output ──┴──▶ tic_finder.py ──▶ ranked candidate tics   (4a: DISCOVERY)
-                              │    measure_density.py ─▶ known-tic regression (4b: CONFIRM/RETIRE)
-                              └──▶ run_judge.py ──▶ differential-reading tally (5:  BLIND JUDGE)
+                              ├──▶ run_judge.py ──▶ differential-reading tally  (H4: THE ARBITER)
+                              │        └─ family_rollup.py ─▶ deterministic recount of judge diffs
+                              │
+                              ├──▶ measure_density.py ─▶ per-metric rates  (tracking + reporting color)
+                              └──▶ tic_finder.py ──▶ ranked over-representations  (optional artifact)
 ```
 
-Two independent detector families — the statistical diff (4a/4b) and the blind
-judge (5) — corroborate at compile time; agreement between them is the strongest
-admission signal.
+**The blind judge (`run_judge.py`) is the arbiter.** It reads the model's samples
+against the human ideal (the exemplar) and names what recurs as over-style;
+recurrence across samples and briefs is the signal (two-level tally). Admission is
+the judge's call, degree included. `measure_density.py` / the human baseline do
+**not** gate admission — they are reporting color and harvest-to-harvest tracking
+of a tic the judge already named. `tic_finder.py` is a backward-looking artifact,
+kept for a sanity glance, **out of the admission logic** (a keyness diff mislabels
+degree and content as signal — see the reviewer steer, 2026-07-20).
 
-## tic_finder.py — the discovery instrument (Component 4a)
+## generate_corpus.py — target corpus generation (H2)
+
+Generates target-model output for every battery brief, one fresh-context API call
+per output (no carried history), arm-clean: arm A carries no system prompt, arm B
+carries the S0 core body (backstop region empty). Varies only sampling across the
+N samples of a brief. Writes `outputs/<model>/<arm>/<pid>.<NN>.md` and an auditable
+`generation-provenance.json` (model IDs, arm prompt hashes, battery hash, per-output
+sha/wordcount/stop_reason). Chosen over subagents so fresh context is structural and
+the exact target model is pinned.
+
+## run_judge.py — blind judge, THE arbiter (H4)
+
+Diffs each target sample against the same-brief exemplar; the judge enumerates how
+they differ in *how* they are written and flags generated habits. `prepare`
+(blinded packets + sealed key) → `dispatch` (Anthropic API) → `tally` (two-level
+recurrence + optional batched LLM clustering). See its own section below.
+
+## family_rollup.py — deterministic recount of judge output
+
+Groups the judge's raw differences by a fixed keyword-family map (readable in the
+script), same two-level gate as `tally`. A transparent cross-check on the LLM
+clustering, reliable where a clustering batch degrades. Reads a `tally --json` file.
+
+## tic_finder.py — backward-looking artifact (optional; Component 4a, demoted)
 
 Diffs a target model's writing against the task-matched exemplar and
-ranks the features the target **over-represents** (log-odds keyness: words,
-n-grams, punctuation, sentence openings, sentence shapes). **No predefined tic
-list** — an unnamed tic can surface. This is the tool that answers the whole
-project's question: *what does this new model overdo?*
+ranks the features the target **over-represents** (log-odds keyness). **Not in the
+admission logic** — kept only as an optional sanity glance. It can only rank
+features a human still recognizes as a known tic, so it cannot surface the unnamed
+tics the harvest exists to catch; that is the judge's job.
 
 ```
 # one pair
@@ -40,15 +72,16 @@ names the structural/stylistic candidates and grounding-checks them against real
 writing before anything reaches the backstop. Single short pairs are
 underpowered — pool.
 
-## run_judge.py — blind-judge leg (Component 5)
+## run_judge.py — blind judge, the arbiter (Component 5 / H4) — full reference
 
-The **second, independent detector.** Where `tic_finder.py` ranks features a
-target over-represents against a reference distribution, the judge reads two
-concrete passages side by side and enumerates *how* they differ. It works at any
-N (no pooled corpus needed), catches pattern-level tics no regex can rank, and
-covers `tic_finder.py`'s blind spot — a tic **shared** by the exemplar generator
-and the target cancels out of the keyness diff but still shows up to a judge that
-never sees the reference distribution.
+*(Also summarized above; this is the operational detail.)* The judge reads two
+concrete passages for the same brief side by side and enumerates *how* they
+differ, flagging generated habits. It works at any N (no pooled corpus needed),
+catches pattern-level tics no regex can rank, and — unlike a keyness diff — sees a
+tic even when it is **shared** by the exemplar generator and the target (the judge
+never sees a reference distribution, only two passages). Recurrence across samples
+and briefs is what promotes a difference to a candidate; the judge's naming is the
+admission decision.
 
 Three subcommands, one packet format, one judgment schema:
 
@@ -82,12 +115,15 @@ before admission. (Judge = the most capable analytic model available at harvest
 time, chosen on merit; if it equals the target model, note that overlap in
 provenance — a weaker independent check.)
 
-## measure_density.py — known-tic regression (Component 4b)
+## measure_density.py — tracking + reporting metrics (Component 4b)
 
-Measures the named Component-4 metrics (em-dash rate, contrast-negation, triadic,
-etc.) per output, length-normalized. Role: confirm/retire **existing** backstop
-entries, not discover new ones. `--self-test` runs metric sanity checks.
-`fragment_rate` is a Phase-2 stub; `triadic_rate` is a documented proxy.
+Measures the named metrics (em-dash rate, contrast-negation, triadic, etc.) per
+output, length-normalized. Role: **track** an already-named tic harvest-to-harvest
+(did it get better or worse) and supply reporting color — NOT confirm, retire, or
+gate an entry (the judge decides that; a count sees presence, not habit shape).
+Run it against the `sources/` corpus for the human reference. `--self-test` runs
+metric sanity checks. `fragment_rate` is a Phase-2 stub; `triadic_rate` is a
+documented proxy.
 
 ## extract_body.py — prose-vs-scaffolding extraction
 

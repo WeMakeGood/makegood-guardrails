@@ -79,7 +79,7 @@ is no single shared fixed context card.
 
 - [ ] **Preprocess identically to the panel:** strip non-prose scaffolding before any measurement (the rule in `baseline/README.md §1`; `scripts/extract_body.py`). The same rule must govern panel texts, exemplars, and battery outputs, or nothing is comparable.
 - [ ] **4a — open diff (artifact only, see note above):** run `scripts/tic_finder.py --target-dir <outputs> --exemplar-dir baseline/exemplars --pooled`. It ranks the features arm-B outputs **over-represent** vs the task-matched exemplars (log-odds keyness on words, n-grams, punctuation, sentence openings, sentence shapes) — no predefined tic list, so unnamed tics can surface. Pool per model (single short pairs are underpowered). Write ranked findings to `reports/<id>/diff-findings.md`. **Discovery rule:** a feature strongly over-represented, recurring across prompts, is a candidate — named by a human at compile time. Content-word hits are noise; the human names structural/stylistic candidates. (Enrichment: if `fingerprints/<genre>.json` exists, diff against it too as a second, real-writing reference.)
-- [ ] **4b — known-tic regression:** measure the named metrics per output with `scripts/measure_density.py`; compare against `metrics-baseline.json` envelopes. Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`. **Regression rule:** a known metric flags in ≥ 60% of arm-B outputs → the corresponding backstop entry is confirmed; entries with no leakage move toward retirement.
+- [ ] **4b — density metrics (tracking + reporting, NOT a gate):** measure the named metrics per output with `scripts/measure_density.py`, and measure the `sources/` human corpus for the reference. Write per-output rows and per-(model, arm) aggregates to `reports/<id>/counts.md`. These numbers **track** a judge-named tic harvest-to-harvest (did it move) and supply reporting color; they do **not** confirm, retire, or gate an entry — the judge does that (a count sees presence, not habit shape).
 - [ ] Control check the 4b suite both directions (if controls exist): every metric must **fire** on `constructions/negative/` and stay **silent** on `constructions/positive/`. A metric failing either is broken or mis-thresholded; fix before trusting its numbers.
 
 ## H4 — Judge: same-brief differential reading
@@ -106,9 +106,9 @@ is no single shared fixed context card.
 
 ## H6 — Compile candidates
 
-- [ ] Write `reports/<id>/candidates.md`, one row per candidate: pattern (human-named for open-diff discoveries) · evidence (over-representation stats and/or 4b regression delta, judge mentions with direction, external citations) · 2–3 example excerpts · proposed threshold + remedy · proposed action (add / amend / retire / no action).
-- [ ] **Grounding check (before admission):** confirm each discovered candidate against the real examples — via `fingerprints/<genre>.json`, or by re-fetching cited panel texts. A pattern occurring at comparable rates in the collected excellent writing is craft, not tic: reject it. Record the check's result in the row.
-- [ ] Apply the admission rule (≥ 2 of 3 detector families) and the retirement rule (no leakage in two consecutive harvests) from HARVEST_PLAN.md Component 7. Include the current backstop's every entry in the table — confirmed, or moved toward retirement. Newly admitted entries each get a 4b regression metric.
+- [ ] Write `reports/<id>/candidates.md`, one row per candidate: pattern (named by the judge) · evidence (judge recurrence across samples/briefs with the generated-habit flag; density rate as tracking/reporting color; external citations if any) · proposed threshold + remedy · proposed action (add / amend / retire / no action).
+- [ ] **Grounding is the judge's job, against the ideal (not a metric gate).** The judge decides whether a recurring pattern is over-style or legitimate craft, reading the model's samples against the human ideal (the exemplar). A density number that contradicts a recurring judge finding is context to route it *back* to the judge, never a rejection: the count sees presence, the judge sees the habit shape. Do not let an aggregate count reject a recurring judge finding (2026-07 lesson).
+- [ ] **Admission rule:** the judge names a pattern as a recurring generated habit (two-level recurrence — across samples of a brief AND across briefs). **Retirement rule:** an entry the judge no longer surfaces across two consecutive harvests is proposed for retirement (reversible; bias toward keeping borderline entries — libraries may still run an older model in which the tic fires). Include the current backstop's every entry. Density metrics track admitted entries harvest-to-harvest; they don't admit or retire. See HARVEST_PLAN.md Component 7.
 
 ## H7 — Human review (the merge gate)
 
@@ -116,7 +116,7 @@ is no single shared fixed context card.
 
 ## H8 — Release
 
-- [ ] Edit `modules/S0_backstop.md` per accepted rows; clear `provisional` markers on confirmed entries.
+- [ ] Update `harvest/BACKSTOP_TRACKER.md` per accepted rows (status + evidence), then **compile its ACTIVE rows** into `modules/S0_backstop.md` — bare thresholds + remedies only, no status tags / evidence / bad examples (the body splices into the model's write-time context; describing a tic there primes it). Check the shipped body against the 25-entry / ~700-token cap.
 - [ ] CHANGELOG entry under **s0-backstop**; bump version (minor for entry changes); tag `s0-backstop-vX.Y.Z`; push with tags.
 - [ ] Libraries adopt on their own schedule via `--update-guardrails S0_BACKSTOP=<version>`; their `--check` will surface `[NEWER]` until they do.
 
