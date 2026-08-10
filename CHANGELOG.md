@@ -7,6 +7,27 @@ Per-module history. Each module is versioned independently with its own git tags
 
 ## F0 — Agent Behavioral Standards
 
+### [2.1.0] — 2026-08-10
+
+Gate 2 gains a paragraph on source language. Additive — no gate trigger changes,
+no existing requirement altered.
+
+- **Carrying a source's words is named as a way of satisfying Gate 2**, rather
+  than as a failure to transform. Gate 2 already treats sourced content as one
+  of three legitimate output kinds, but said nothing about the *form* sourced
+  content takes — which left agents reading it as pressure to paraphrase
+  everything. Paraphrase is the weaker marking: it silently converts sourced
+  content into the agent's own prose and leaves the two indistinguishable.
+- **Reported speech is distinguished from preserved language.** Attributing
+  words to a speaker the reader has no access to obscures rather than clarifies;
+  the reasoning should be stated directly. Preserving a term of art or what a
+  group calls itself is a different move and remains available.
+
+Driven by a measured failure in a downstream consumer: a built context library
+contained zero preserved sentences from ~129,000 tokens of organizational
+source material, with the organization's own terms for itself paraphrased into
+generic prose. Gate 2's silence on form was one of the pressures behind that.
+
 ### [2.0.0] — 2026-07-15
 
 Recalibration for the current model generation, driven by the 2026-07-15
