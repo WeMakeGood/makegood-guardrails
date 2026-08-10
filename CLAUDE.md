@@ -1,17 +1,17 @@
 # CLAUDE.md — makegood-guardrails
 
 Orientation for Claude Code sessions in this repo. `README.md` explains the
-*product* (the F0/S0/backstop modules, versioning, how consumers pull them) —
+*product* (the G1/G2/backstop modules, versioning, how consumers pull them) —
 read it for that. This file covers **the active work and how to hand off between
 sessions**, which the README does not.
 
 ## What this repo is (one line)
 
-The source of truth for Make Good's guardrail modules. `modules/S0_backstop.md`
+The source of truth for Make Good's guardrail modules. `modules/G2_backstop.md`
 is the current-generation prose-signature list; it is meant to be maintained by
 **measurement, not recollection** — via the *harvest* under `harvest/`.
 
-`S0_backstop.md` is a **clean compiled artifact**: bare thresholds + remedies, no
+`G2_backstop.md` is a **clean compiled artifact**: bare thresholds + remedies, no
 status tags, no evidence, no illustrative bad examples. Its body splices verbatim
 into the model's write-time context, so describing a tic there would *prime* it.
 All lifecycle state (active / provisional / metric-pending / retire-track),
@@ -22,7 +22,7 @@ release. Edit the tracker when reasoning; edit the backstop only to ship.
 ## The harvest — active redesign (as of 2026-07-17)
 
 The harvest is a **model-stress instrument**: it discovers a new model's unknown
-writing tics so `S0_backstop.md` can be refactored to catch them. It is NOT a
+writing tics so `G2_backstop.md` can be refactored to catch them. It is NOT a
 demonstration of Make Good's work or a nonprofit-writing exercise. (This point
 was lost repeatedly; see memory `[[harvest-battery-purpose]]`.)
 

@@ -1,9 +1,9 @@
 ---
-module_id: F0
+module_id: G1
 module_name: Agent Behavioral Standards
 tier: foundation
 purpose: "Define behavioral guardrails that all agents must follow"
-version: 2.1.0
+version: 3.0.0
 last_updated: 2026-08-10
 ---
 

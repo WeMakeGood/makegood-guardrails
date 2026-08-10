@@ -1,11 +1,11 @@
 ---
-module_id: S0
+module_id: G2
 module_name: Natural Prose Standards
 tier: shared
 purpose: "Define writing standards for external-facing content"
-version: 2.0.1
+version: 3.0.0
 used_by: [Content & Communications, Thought Leadership, LeadersPath, Client Engagement]
-last_updated: 2026-07-15
+last_updated: 2026-08-10
 ---
 
 # Natural Prose Standards

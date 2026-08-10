@@ -1,11 +1,35 @@
 # Changelog
 
 Per-module history. Each module is versioned independently with its own git tags
-(`f0-vX.Y.Z`, `s0-vX.Y.Z`). Entries are grouped by module.
+(`g1-vX.Y.Z`, `g2-vX.Y.Z`). Entries are grouped by module.
+
+**Renamed at G1 3.0.0 / G2 3.0.0 (2026-08-10):** F0 → G1, S0 → G2, s0-backstop →
+g2-backstop. Entries below the rename describe the modules under the names they
+carried at the time; the history is not rewritten. Tags `f0-v*` and `s0-v*` remain
+in place so un-migrated consumers keep resolving.
 
 ---
 
-## F0 — Agent Behavioral Standards
+## G1 — Agent Behavioral Standards (F0 before 3.0.0)
+
+### [3.0.0] — 2026-08-10
+
+**Renamed F0 → G1.** No content change from 2.1.0.
+
+The `F`/`S` prefixes were context-library tier markers — foundation and shared —
+carried along when these modules were pulled out and vendored here. This repo has
+no tiers, so the prefixes encoded a structure that does not exist in it, and the
+trailing `0` was a second fossil (the modules were renumbered to `0` on the way
+out). More practically, they collide: libraries use `F`/`S`/`D` for their own
+modules with their own numbering, and a guardrail named `S0` sitting beside a
+library's own `S0` is a real ambiguity.
+
+`G#` is flat, says what these are, and cannot collide with a library's coding.
+
+**Major per this repo's convention: a rename is breaking for consumers.** A
+library that has not migrated fails loudly at resolve time rather than silently
+fetching nothing. The `f0-v*` tags remain in place — they are what un-migrated
+consumers resolve against.
 
 ### [2.1.0] — 2026-08-10
 
@@ -98,7 +122,7 @@ Gates at this version:
 
 ---
 
-## S0 — Natural Prose Standards
+## G2 — Natural Prose Standards (S0 before 3.0.0)
 
 ### [2.0.1] — 2026-07-15
 
@@ -148,7 +172,7 @@ Conditional module — loaded by external-facing agents only.
 
 ---
 
-## s0-backstop — S0 Revision Backstop (current-generation prose signature)
+## g2-backstop — G2 Revision Backstop (s0-backstop before 2.0.0)
 
 ### [1.1.0] — 2026-07-20 — first harvest-measured revision
 

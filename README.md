@@ -4,13 +4,13 @@ The single source of truth for Make Good's behavioral guardrail modules — the 
 
 This repo holds two modules and one spliced artifact:
 
-- **`modules/F0_agent_behavioral_standards.md`** — process gates governing how *any* agent produces output (sourcing, marking inference vs. analysis, reframing, second-order checks, generalization). Loaded by every agent in every library.
-- **`modules/S0_natural_prose_standards.md`** — writing standards for external-facing content (practitioner voice, earned claims, leading with the point, the medium's shape). Loaded by agents that produce external content. The durable *core*: gates and discipline only.
-- **`modules/S0_backstop.md`** — the current-generation prose-signature list (tics, density thresholds, remedies). Independently versioned because it tracks the *model landscape* rather than the prose philosophy; spliced into the vendored S0 between `BACKSTOP:BEGIN/END` markers at resolve time, so consumers still receive a single S0 file. Maintained by measurement, not recollection — see `HARVEST_PLAN.md` for the harvest protocol that proposes each update (human-reviewed before release).
+- **`modules/G1_agent_behavioral_standards.md`** — process gates governing how *any* agent produces output (sourcing, marking inference vs. analysis, reframing, second-order checks, generalization). Loaded by every agent in every library.
+- **`modules/G2_natural_prose_standards.md`** — writing standards for external-facing content (practitioner voice, earned claims, leading with the point, the medium's shape). Loaded by agents that produce external content. The durable *core*: gates and discipline only.
+- **`modules/G2_backstop.md`** — the current-generation prose-signature list (tics, density thresholds, remedies). Independently versioned because it tracks the *model landscape* rather than the prose philosophy; spliced into the vendored G2 between `BACKSTOP:BEGIN/END` markers at resolve time, so consumers still receive a single G2 file. Maintained by measurement, not recollection — see `HARVEST_PLAN.md` for the harvest protocol that proposes each update (human-reviewed before release).
 
 ## Why this repo exists
 
-These modules were previously copied by hand into every library and skill that used them, with no source of truth. They drifted: at one point F0 existed in three distinct on-disk versions and S0 in two, and the copy governing live agents differed from the copy seeded into new libraries. This repo makes the modules a **versioned dependency** instead of a copied file, so a change is made once and adopted deliberately rather than propagated by hand.
+These modules were previously copied by hand into every library and skill that used them, with no source of truth. They drifted: at one point G1 existed in three distinct on-disk versions and G2 in two, and the copy governing live agents differed from the copy seeded into new libraries. This repo makes the modules a **versioned dependency** instead of a copied file, so a change is made once and adopted deliberately rather than propagated by hand.
 
 ## How consumers use it
 
@@ -23,7 +23,7 @@ See `IMPLEMENTATION_PLAN.md` for the full design, the per-library lock format, d
 
 ## Versioning
 
-Each module is versioned independently with its own semver git tags (`f0-vX.Y.Z`, `s0-vX.Y.Z`, `s0-backstop-vX.Y.Z`). They change on different cadences — the S0 core rarely, F0 occasionally, the backstop at every harvest — so a stable artifact is not re-versioned every time another moves.
+Each module is versioned independently with its own semver git tags (`g1-vX.Y.Z`, `g2-vX.Y.Z`, `g2-backstop-vX.Y.Z`). They change on different cadences — the G2 core rarely, G1 occasionally, the backstop at every harvest — so a stable artifact is not re-versioned every time another moves.
 
 - **Patch** — wording clarification, no change to what a gate makes an agent do.
 - **Minor** — a gate added or extended additively.

@@ -15,7 +15,7 @@ battery is now a **growing pool, not frozen**, and the judge is chosen as the
 
 ## The problem this solves
 
-S0's Revision Backstop — the list of words and constructions that slip past the process gates — is authored from recollection of what AI-generated prose sounds like. Recollection is stale by construction, two ways:
+G2's Revision Backstop — the list of words and constructions that slip past the process gates — is authored from recollection of what AI-generated prose sounds like. Recollection is stale by construction, two ways:
 
 1. **Cutoff staleness.** Any model's knowledge of "current AI tics" ends at its training cutoff, before the models the list must govern have shipped. The v1.0.0 backstop ("delve, tapestry, foster...") targets the 2023–2024 generation's vocabulary signature; the current generation's signature is mostly **syntactic** (contrast-negation scaffolding, em-dash density, triadic lists, bold lead-ins, punch fragments) and the list catches almost none of it.
 2. **Self-observation bias.** A model is a poor witness to its own generation's tics. Prior generations' tics are well-documented in training data; a model's own signature is partially invisible to it from the inside.
@@ -32,23 +32,23 @@ The fix is to stop authoring the list and start **measuring** it: generate outpu
 - **The judge decides; evidence earns a slot.** *(Revised 2026-07-20 — superseded the original "≥2 of 3 detectors" rule.)* The blind judge is the arbiter, degree included: it reads the model's samples against the human ideal (the exemplar) and names what the model *over-does*. **Recurrence across samples and briefs** is the over-style signal — a pattern the model reaches for sample after sample against the fixed ideal is a preference, not a one-off. A pattern the judge names as a recurring generated habit enters the backstop. Density metrics and external signal do **not** gate admission and never veto a judge finding — they are reporting color and harvest-to-harvest tracking of a tic the judge already named (a metric is defined *from* a finding, downstream of it). This matters because a metric can only measure a tic someone already named, so metric-gating re-imports the backward-looking flaw the harvest exists to escape. A pattern with no observed recurrence across two consecutive harvests is retired. The list can shrink. See `[[harvest-judge-is-arbiter]]`.
 - **Stable core + growing pool; the models change.** *(Revised 2026-07-17 — superseded the original "the battery is frozen.")* A stable brief core makes harvests comparable across model generations — the longitudinal signal is the point. But the battery is designed to **grow**: registers and briefs are added as coverage gaps surface, because a discovery instrument for tics we can't yet name needs room for an unknown tic to appear. Freezing optimizes for regression (watch a known tic move against fixed inputs) — the opposite of discovery. Regression tracking of known tics is a separate, smaller concern. See `[[harvest-battery-purpose]]`.
 - **The reference numbers come from pre-2023 human writing.** Human writing is increasingly model-inflected, so the identification panel measures only verifiably pre-2023 published texts. The panel is measure-and-cite (no text stored); re-deriving the envelope is a versioned event, never a silent drift.
-- **Distribution rides the existing lock pipeline.** The backstop is an independently versioned artifact in this repo, pinned via `guardrails.lock`, vendored by `--resolve-guardrails`. Libraries adopt updates by deliberate bump, exactly like F0/S0 today. No runtime lookup, ever — always-load content is in the system prompt from turn one, per the delivery principle in the skill's ARCHITECTURE.md.
+- **Distribution rides the existing lock pipeline.** The backstop is an independently versioned artifact in this repo, pinned via `guardrails.lock`, vendored by `--resolve-guardrails`. Libraries adopt updates by deliberate bump, exactly like G1/G2 today. No runtime lookup, ever — always-load content is in the system prompt from turn one, per the delivery principle in the skill's ARCHITECTURE.md.
 - **Human review is non-negotiable.** The harvest proposes; a human disposes. A fully automated list would let one anomalous run ban ordinary English.
 
 ---
 
-## Component 1 — The S0 core / backstop split
+## Component 1 — The G2 core / backstop split
 
-S0 splits into a durable core and a volatile backstop, applying the skill's own volatile-vs-durable test to the module itself:
+G2 splits into a durable core and a volatile backstop, applying the skill's own volatile-vs-durable test to the module itself:
 
 | Artifact | Contains | Changes when | Tags |
 |---|---|---|---|
-| **S0 core** | The process gates (Practitioner Voice, Earn Every Claim, Start From the Point), Writing Discipline, purpose/scope | The prose *philosophy* changes | `s0-vX.Y.Z` (existing) |
-| **S0 backstop** | The current-generation tic list: patterns, thresholds, remedies | The *model landscape* changes (each harvest) | `s0-backstop-vX.Y.Z` (new) |
+| **G2 core** | The process gates (Practitioner Voice, Earn Every Claim, Start From the Point), Writing Discipline, purpose/scope | The prose *philosophy* changes | `g2-vX.Y.Z` (existing) |
+| **G2 backstop** | The current-generation tic list: patterns, thresholds, remedies | The *model landscape* changes (each harvest) | `g2-backstop-vX.Y.Z` (new) |
 
 ### Splice mechanism — delivered artifact stays one file
 
-S0 core's Revision Backstop section is replaced by splice markers:
+G2 core's Revision Backstop section is replaced by splice markers:
 
 ```markdown
 ## Revision Backstop
@@ -59,28 +59,28 @@ not recalled. When an entry fires, don't just fix the instance: return to the
 practitioner voice gate and rewrite from that person's perspective.
 
 <!-- BACKSTOP:BEGIN -->
-<!-- Resolved from s0-backstop at vendor time. Do not hand-edit. -->
+<!-- Resolved from g2-backstop at vendor time. Do not hand-edit. -->
 <!-- BACKSTOP:END -->
 ```
 
-`--resolve-guardrails` fetches S0 core and the backstop at their locked versions, splices the backstop content between the markers, and writes the vendored `S0_natural_prose_standards.md` as a **single file**. Consequences:
+`--resolve-guardrails` fetches G2 core and the backstop at their locked versions, splices the backstop content between the markers, and writes the vendored `G2_natural_prose_standards.md` as a **single file**. Consequences:
 
-- Agent files, `## Required Reading` directives, the F0/S0 hard rule, and every validation script are untouched — they continue to see one S0 file.
-- The vendored file's `<!-- GENERATED -->` banner records both versions (`s0@v2.0.0 + s0-backstop@v1.2.0`).
+- Agent files, `## Required Reading` directives, the G1/G2 hard rule, and every validation script are untouched — they continue to see one G2 file.
+- The vendored file's `<!-- GENERATED -->` banner records both versions (`s0@v2.0.0 + g2-backstop@v1.2.0`).
 
 ### Lock format addition
 
 ```yaml
 declared:
-  F0: 1.3.0
-  S0: 2.0.0
-  S0_BACKSTOP: 1.0.0
+  G1: 1.3.0
+  G2: 2.0.0
+  G2_BACKSTOP: 1.0.0
 resolved:
-  S0_BACKSTOP:
+  G2_BACKSTOP:
     version: 1.0.0
-    tag: s0-backstop-v1.0.0
+    tag: g2-backstop-v1.0.0
     sha: <sha>
-    spliced_into: modules/shared/S0_natural_prose_standards.md
+    spliced_into: modules/shared/G2_natural_prose_standards.md
 ```
 
 ### Backstop versioning semantics
@@ -91,7 +91,7 @@ resolved:
 
 ### `--check` addition: upstream-newer notice
 
-`--check` currently reports hand-edit drift. It gains a report-only notice when the upstream repo has a newer tagged backstop (or F0/S0) than the library's lock: *"s0-backstop v1.2.0 available (locked: v1.0.0) — run --update-guardrails to adopt."* Stale libraries surface themselves; nothing auto-updates.
+`--check` currently reports hand-edit drift. It gains a report-only notice when the upstream repo has a newer tagged backstop (or G1/G2) than the library's lock: *"g2-backstop v1.2.0 available (locked: v1.0.0) — run --update-guardrails to adopt."* Stale libraries surface themselves; nothing auto-updates.
 
 ### Backstop entry format
 
@@ -108,7 +108,7 @@ Entries are threshold-phrased and point back to the gates as the remedy:
   Remedy: most em-dashes are a comma, a period, or a cut in disguise.
 ```
 
-**Cap: 25 entries / ~700 tokens.** The gates are the mechanism; the backstop is the net under them. If the list wants to grow past the cap, the correct response is a gate change (S0 core version bump), not a longer list.
+**Cap: 25 entries / ~700 tokens.** The gates are the mechanism; the backstop is the net under them. If the list wants to grow past the cap, the correct response is a gate change (G2 core version bump), not a longer list.
 
 ---
 
@@ -117,9 +117,9 @@ Entries are threshold-phrased and point back to the gates as the remedy:
 ```
 makegood-guardrails/
   modules/
-    F0_agent_behavioral_standards.md
-    S0_natural_prose_standards.md          (core, with splice markers)
-    S0_backstop.md                          (NEW — the versioned tic list)
+    G1_agent_behavioral_standards.md
+    G2_natural_prose_standards.md          (core, with splice markers)
+    G2_backstop.md                          (NEW — the versioned tic list)
   harvest/
     HARVEST.md                              (the runbook — protocol below)
     battery/
@@ -163,13 +163,13 @@ makegood-guardrails/
 **The purpose, stated first because getting it wrong invalidated three designs:** the reference layer must make it possible to identify problems that appear in *later* models — patterns nobody has named yet — and to test for them reproducibly. A closed set of known-tic metrics can only re-measure what's already named; a baseline expressed as tic-count envelopes is the stale-recollection failure mode wearing a quantitative costume. Four rejected designs:
 
 1. A freely model-*synthesized* baseline — carries the measuring generation's own densities; the ruler measures itself. (Escaped by generating with a *different* generation than the target and craft-sourcing from real human writing.)
-2. A **Make Good–archives baseline** — S0 is a *normalizer* (generic practitioner floor; voice specificity is the voice profiles' job per S0 2.0.1 precedence); one house style must not define "human normal."
+2. A **Make Good–archives baseline** — G2 is a *normalizer* (generic practitioner floor; voice specificity is the voice profiles' job per G2 2.0.1 precedence); one house style must not define "human normal."
 3. A **curated fixed-length human-sample corpus** — fixed word-count bands ignore genre length reality, and any hand-curated human set is too small to test against.
 4. An **identification panel reduced to known-tic envelopes** — structurally incapable of surfacing an unnamed tic, because there is no column for it. Measuring real writing only on the 12 named metrics answers "how much do humans use the tics we already know?" — not the question.
 
 A fifth design (the "v4" three-layer plan: collected panel → craft profiles + fingerprints → exemplars → differential testing) was **correct but heavier than needed.** In practice the collect/screen/discard corpus work was the bottleneck and wasn't required to reach the goal. The **working design** keeps v4's principle (*discovery over confirmation*) and its invariants, and simplifies the machinery: the synthetic exemplars **are** the baseline; the human panel is craft-input + grounding, not a required product pipeline.
 
-**The reference — a synthetic exemplar set (the quality bar).** For every battery brief, a craft-strong **exemplar** (`baseline/exemplars/<ID>/exemplar.md`), written to the *same brief* (and substrate, where the register has one) the battery uses. Task-matching is the property only synthesis provides and the reason this works — a diff against real text is confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. The exemplar is the human-grade **quality bar**: what the best available model produces disposed to write like the skilled humans in the craft corpus. Generation rules (full detail in `baseline/exemplars/README.md`): **different model generation** than the targets (the cross-generation guard); **no S0/F0/backstop/tic-list** in the generator's context (sourcing the reference with our tic theory would re-close the discovery loop); **craft-sourced via `v2-learn-decisions`** (the generator learns the *decisions* behind the `sources/` corpus rather than imitating voice — reaches sub-tone mechanics a "write like this" prompt misses); **versioned + re-approved**, not frozen-forever. Economical (no collection treadmill), repeatable (one task-matched yardstick per brief across models over time). 31 exemplars committed 2026-07-18. See `[[harvest-exemplar-learning-instruction]]`.
+**The reference — a synthetic exemplar set (the quality bar).** For every battery brief, a craft-strong **exemplar** (`baseline/exemplars/<ID>/exemplar.md`), written to the *same brief* (and substrate, where the register has one) the battery uses. Task-matching is the property only synthesis provides and the reason this works — a diff against real text is confounded by topic; against a task-matched exemplar, every difference is attributable to *how it's written*. The exemplar is the human-grade **quality bar**: what the best available model produces disposed to write like the skilled humans in the craft corpus. Generation rules (full detail in `baseline/exemplars/README.md`): **different model generation** than the targets (the cross-generation guard); **no G2/G1/backstop/tic-list** in the generator's context (sourcing the reference with our tic theory would re-close the discovery loop); **craft-sourced via `v2-learn-decisions`** (the generator learns the *decisions* behind the `sources/` corpus rather than imitating voice — reaches sub-tone mechanics a "write like this" prompt misses); **versioned + re-approved**, not frozen-forever. Economical (no collection treadmill), repeatable (one task-matched yardstick per brief across models over time). 31 exemplars committed 2026-07-18. See `[[harvest-exemplar-learning-instruction]]`.
 
 **The human panel — craft input + grounding, not the baseline.** The measured human texts (`panel.jsonl`) are what the generator *studies* to write craft-strong exemplars, and the reference a discovered candidate is grounding-checked against. It never grows on a schedule; it is enrichment, not a harvest blocker.
 
@@ -197,9 +197,9 @@ substrate (in `core.jsonl`); there is no single shared fixed context card.
 | Arm | System prompt | Purpose |
 |---|---|---|
 | **A — control** | no guardrail modules (brief + its own substrate only) | Measures the raw signature; also the denominator for gate effectiveness |
-| **B — gates-only** | S0 core (no backstop) | The primary corpus: what leaks through the gates is the backstop's job |
+| **B — gates-only** | G2 core (no backstop) | The primary corpus: what leaks through the gates is the backstop's job |
 
-Same harness, same order, fresh context per prompt. Arm B minus arm A is the **gate-effectiveness** measure — a free health check on S0 core itself. If a tic is equally dense in both arms, the gates never touched it; if the gates suppress it, it may not need a backstop entry at all.
+Same harness, same order, fresh context per prompt. Arm B minus arm A is the **gate-effectiveness** measure — a free health check on G2 core itself. If a tic is equally dense in both arms, the gates never touched it; if the gates suppress it, it may not need a backstop entry at all.
 
 > **Superseded 2026-07-17.** The original v1 battery — a frozen single-org
 > promotional set (Harbor Bend Community Land Trust context card + 12 prompts
@@ -277,7 +277,7 @@ The named metrics below, measured per output against the per-genre envelopes in 
 The open *qualitative* detector — catches pattern-level differences neither statistical layer can represent (structural moves, emphasis habits, how evidence is deployed).
 
 - **Pairing.** Each arm-B output is paired with the **exemplar for the same battery prompt** (`baseline/exemplars/<prompt-id>/`). Same brief, same facts — the comparison is purely about the writing.
-- **Judge.** The **most capable analytic model available** at harvest time, chosen on merit (the judge does hard analytic work) — *not* selected merely for being a different generation. *(Revised 2026-07-17 — superseded the earlier "different generation than target and exemplar generator" framing.)* Fresh context per pair, no S0 loaded. No "latest" alias exists — record the pinned model id in the report; if the judge equals the target model, note that overlap as a weaker independent check.
+- **Judge.** The **most capable analytic model available** at harvest time, chosen on merit (the judge does hard analytic work) — *not* selected merely for being a different generation. *(Revised 2026-07-17 — superseded the earlier "different generation than target and exemplar generator" framing.)* Fresh context per pair, no G2 loaded. No "latest" alias exists — record the pinned model id in the report; if the judge equals the target model, note that overlap as a weaker independent check.
 - **Presentation.** Randomized A/B order, no provenance metadata; the judge is not told which is which.
 - **Judge prompt (template):**
 
@@ -305,7 +305,7 @@ An agentic web-research pass at harvest time, because the freshest tic catalogs 
 2. **Grounding is the judge's job, against the ideal.** *(Revised 2026-07-20.)* The judge reads the model's samples against the human ideal (the exemplar for that brief) and decides whether a recurring pattern is over-style or legitimate craft — degree is the judge's call, made against the ideal in front of it. A density number that *contradicts* the judge (e.g. "humans use this at a comparable rate") is context to route the finding **back to the judge**, never a rejection on its own. Do not let an aggregate count reject a recurring judge finding: the count sees *presence*; the judge sees the *habit shape* (e.g. the escalating tricolon closer vs. a plain human triad). See `[[harvest-judge-is-arbiter]]`.
 3. **Admission rule:** the judge names a pattern as a recurring generated habit (recurrence across samples of a brief AND across briefs — the two-level tally). **Retirement rule:** an entry the judge no longer surfaces across two consecutive harvests is proposed for retirement (reversible; bias toward keeping borderline entries, since libraries may still run an older model in which the tic fires). Density metrics track admitted entries harvest-to-harvest but do not admit or retire them.
 4. **Human review:** Chris (or designated reviewer) accepts/prunes per row. The reviewer's specific judgment calls: is this overuse or legitimate technique at observed density? Is the threshold right? Does the remedy point back to the right gate?
-5. **Release:** `modules/S0_backstop.md` is a **clean compiled artifact** — bare thresholds + remedies only, no status tags, no evidence, no illustrative bad examples, because its body splices verbatim into the model's write-time context and describing a tic there primes it. All lifecycle state, per-harvest evidence, and worked examples live in `harvest/BACKSTOP_TRACKER.md`; the release step hand-compiles the tracker's ACTIVE rows into the shipped module. A newly admitted entry may get a tracking metric in `measure_density.py` for the *next* harvest's continuity (not a gate). Then: changelog entry, tag `s0-backstop-vX.Y.Z`. Libraries adopt by `--update-guardrails S0_BACKSTOP=<version>` on their own schedule. See `[[backstop-compiled-artifact]]`.
+5. **Release:** `modules/G2_backstop.md` is a **clean compiled artifact** — bare thresholds + remedies only, no status tags, no evidence, no illustrative bad examples, because its body splices verbatim into the model's write-time context and describing a tic there primes it. All lifecycle state, per-harvest evidence, and worked examples live in `harvest/BACKSTOP_TRACKER.md`; the release step hand-compiles the tracker's ACTIVE rows into the shipped module. A newly admitted entry may get a tracking metric in `measure_density.py` for the *next* harvest's continuity (not a gate). Then: changelog entry, tag `g2-backstop-vX.Y.Z`. Libraries adopt by `--update-guardrails G2_BACKSTOP=<version>` on their own schedule. See `[[backstop-compiled-artifact]]`.
 
 ---
 
@@ -321,7 +321,7 @@ An agentic web-research pass at harvest time, because the freshest tic catalogs 
   K survived the grounding check and review
 - Known-tic regression: [entries confirmed / moved toward retirement / drifted]
 - Gate effectiveness: [what the gates suppressed vs. passed, arm A → arm B]
-- Backstop: N entries added, M retired → s0-backstop-vX.Y.Z
+- Backstop: N entries added, M retired → g2-backstop-vX.Y.Z
 
 ## What this generation sounds like
 [2–4 paragraphs: the signature in plain language, with excerpts.
@@ -336,7 +336,7 @@ check result; the judge's recurring differences with direction.]
 
 ## What the gates caught and missed
 [Arm A vs. B — which tics the gates suppress, which pass through untouched.
-Implications for S0 core, if any.]
+Implications for G2 core, if any.]
 
 ## What to listen for in review
 [The operator-facing payoff: the 3–5 constructions a human reviewer should
@@ -366,10 +366,10 @@ The "What to listen for in review" section is deliberately reusable: it is the s
 ## Rollout phases
 
 **Phase 0 — the split (no harvest yet).** *(Scope approved 2026-07-15, including the cascade.)*
-Split S0 into core + backstop; seed `s0-backstop-v1.0.0` with the current v1.0.0 list *plus* the audit-identified syntactic candidates (contrast-negation, em-dash chaining, triadic lists, bold lead-ins, fragments, signposting), each **marked provisional** — they are training-derived recollection, exactly the failure mode this system replaces, and the first harvest confirms or corrects them. **S0 core lands as v2.0 in the same change**: the split, plus voice-profile precedence routing (a loaded voice profile is the practitioner; the profile's specifics override generic practitioner inference — S0 is the floor, the profile is the voice) and the medium-shape gate (write in the deliverable's shape, not chat's). Lock-format and `--resolve-guardrails`/`--check` changes in `build-deploy-bundles.py` (coordinated change with the `building-context-libraries` skill — new skill minor version + Phase M migration for existing libraries). **F0 v2.0** (arming conditions for Gates 3–5, "Where the Gates Run" guidance, de-templated Gate 1 refusal text) lands in the same coordinated wave — a *major* bump, not the originally-drafted v1.4, because arming conditions narrow gate triggers and this repo's semver convention classifies trigger-narrowing as major.
+Split G2 into core + backstop; seed `g2-backstop-v1.0.0` with the current v1.0.0 list *plus* the audit-identified syntactic candidates (contrast-negation, em-dash chaining, triadic lists, bold lead-ins, fragments, signposting), each **marked provisional** — they are training-derived recollection, exactly the failure mode this system replaces, and the first harvest confirms or corrects them. **G2 core lands as v2.0 in the same change**: the split, plus voice-profile precedence routing (a loaded voice profile is the practitioner; the profile's specifics override generic practitioner inference — G2 is the floor, the profile is the voice) and the medium-shape gate (write in the deliverable's shape, not chat's). Lock-format and `--resolve-guardrails`/`--check` changes in `build-deploy-bundles.py` (coordinated change with the `building-context-libraries` skill — new skill minor version + Phase M migration for existing libraries). **G1 v2.0** (arming conditions for Gates 3–5, "Where the Gates Run" guidance, de-templated Gate 1 refusal text) lands in the same coordinated wave — a *major* bump, not the originally-drafted v1.4, because arming conditions narrow gate triggers and this repo's semver convention classifies trigger-narrowing as major.
 
 **Phase 1 — first manual harvest.**
-Write `harvest/HARVEST.md` as a runbook an operator executes with Claude Code assistance: assemble + freeze baseline, calibrate thresholds, run battery (two arms), hand/agent-count metrics, run judge protocol, external-signal pass, compile, review, release `s0-backstop-v1.1.0`. Everything is files and prompts; no new tooling required.
+Write `harvest/HARVEST.md` as a runbook an operator executes with Claude Code assistance: assemble + freeze baseline, calibrate thresholds, run battery (two arms), hand/agent-count metrics, run judge protocol, external-signal pass, compile, review, release `g2-backstop-v1.1.0`. Everything is files and prompts; no new tooling required.
 
 **Phase 2 — instrument.**
 `measure_density.py` (zero-dep Python); a judge-harness prompt file; the runbook drops to a half-day of operator time.
@@ -402,4 +402,4 @@ A recurring agentic run (scheduled agent or skill invocation) that executes batt
 - **Per-agent behavioral evals** for context libraries (skill-audit finding K-5) — separate artifact; may reuse the harvest harness.
 - **Phase 3 automation infrastructure choices** (where the scheduled run lives, PR mechanics).
 
-*(S0 core v2.0 and F0 v2.0 were originally listed here; per 2026-07-15 review they move into the Phase 0 wave — see Rollout phases.)*
+*(G2 core v2.0 and G1 v2.0 were originally listed here; per 2026-07-15 review they move into the Phase 0 wave — see Rollout phases.)*
