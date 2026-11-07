@@ -21,6 +21,10 @@ Consumers (context libraries, the `building-context-libraries` skill) **pull a p
 
 See `IMPLEMENTATION_PLAN.md` for the full design, the per-library lock format, deploy-script integration, and the migration sequence.
 
+## Design principle: gates, not failure modes
+
+The modules are structured as process gates rather than named failure modes deliberately. The goal is to make certain failure modes architecturally difficult by requiring incompatible upstream steps, not to describe failure modes and monitor for them. If you are modifying or extending a module, maintain that principle: adding explicit failure-mode descriptions works against the design. *(Moved here from G1's closing "A Note on This Document" at 4.0.0, because it instructs maintainers rather than the model.)*
+
 ## Versioning
 
 Each module is versioned independently with its own semver git tags (`g1-vX.Y.Z`, `g2-vX.Y.Z`, `g2-backstop-vX.Y.Z`). They change on different cadences — the G2 core rarely, G1 occasionally, the backstop at every harvest — so a stable artifact is not re-versioned every time another moves.
