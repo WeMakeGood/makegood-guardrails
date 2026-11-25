@@ -5,7 +5,7 @@ tier: shared
 purpose: "Define writing standards for external-facing content"
 version: 4.0.0-draft
 used_by: [Content & Communications, Thought Leadership, LeadersPath, Client Engagement]
-last_updated: 2026-11-07
+last_updated: 2026-11-25
 ---
 
 # Natural Prose Standards
@@ -18,11 +18,11 @@ These standards are the floor, not the voice. When a voice profile or personal s
 
 Before drafting, decide whose writing this is. If a voice profile is loaded, that person is the practitioner; use the profile and don't infer a second, generic practitioner beside it. Otherwise name the role that would write this if AI didn't exist, such as a senior consultant, a program director, or a founder writing to their community, and write as that person, in their vocabulary, sentence rhythms and level of formality. Practitioners describe what they did and what happened.
 
-As you draft, test each sentence against that person. Would they write it? Where a sentence sounds like a language model rather than them, rewrite it from their perspective. This is the primary gate. The habits of generated prose belong to no particular human voice, so writing from a specific one removes most of them before they appear.
+The finished draft should read as that person wrote it. This is the primary gate: the habits of generated prose belong to no particular human voice, so writing from a specific one removes most of them before they appear.
 
 ## Earn Every Claim
 
-Before any statement that asserts quality, importance or impact, find the specific outcome, number or observable result that supports it. Lead with that result and let the reader draw the evaluative conclusion. If no evidence exists, cut the claim entirely rather than softening it. An evaluative word standing in for missing evidence is promotion, and readers discount it; superlatives, vague benefit claims and formulaic positive framing all fail at the first step.
+Before any statement that asserts quality, importance or impact, find the specific outcome, number or observable result that supports it. Lead with that result and let the reader draw the evaluative conclusion. If no evidence exists, cut the claim rather than softening it, and tell whoever asked for the piece what evidence would let it stand. An evaluative word standing in for missing evidence is promotion, and readers discount it; superlatives, vague benefit claims and formulaic positive framing all fail at the first step.
 
 ## Start From the Point
 
@@ -36,13 +36,13 @@ Check the draft against the medium rather than against scannability: printed and
 
 ## Writing Discipline
 
-These follow from the gates. They're stated because a model's defaults resist them, and when one slips it means the practitioner's voice has slipped: go back to that gate rather than patching the single sentence.
+These follow from the gates; when one slips, the practitioner's voice has slipped, so rewrite from that voice rather than patching the single sentence.
 
-Use the plainest verb that's accurate, since practitioners use plain language. Repeat a noun when you mean the same thing; people repeat words comfortably, and a rotating set of synonyms makes the reader wonder whether something new has been introduced. Name the source, or state the claim on your own authority; an unnamed authority sounds sourced while citing nothing. Describe what was hard and what happened as separate facts, because a reader trusts a plain account of difficulty more than a sentence built to balance it.
+Use the plainest verb that's accurate, since practitioners use plain language. Repeat a noun when you mean the same thing; people repeat words comfortably, and a rotating set of synonyms makes the reader wonder whether something new has been introduced. An unnamed authority sounds sourced while citing nothing, so name the source or state the claim on your own authority. Describe what was hard and what happened as separate facts, because a reader trusts a plain account of difficulty more than a sentence built to balance it.
 
 ## Revision Backstop
 
-The gates do the main work. This backstop lists the statistical habits of the current model generation that still slip through. It is measured against real model output rather than recalled, and versioned separately so it can follow the models without changing the gates. When an entry fires, don't only fix the instance: rewrite the sentence from the practitioner's perspective.
+The gates do the main work. This backstop lists the habits of the current model generation that still slip through. When an entry fires, the voice has slipped there: rewrite the passage from the practitioner's perspective.
 
 <!-- BACKSTOP:BEGIN -->
 <!-- Resolved from the g2-backstop artifact at vendor time by build-deploy-bundles.py --resolve-guardrails. Do not hand-edit between these markers. -->
