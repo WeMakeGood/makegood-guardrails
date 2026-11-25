@@ -12,6 +12,19 @@ in place so un-migrated consumers keep resolving.
 
 ## G1 — Agent Behavioral Standards (F0 before 3.0.0)
 
+### [4.0.0] — 2026-11-25
+
+**Rewritten for the Claude 5-series models.** Each gate is now stated as the operation at its moment and why it matters to whoever acts on the work, so an agent can apply it to cases the module doesn't name. The module is about half its former size; nothing was cut for length.
+
+- **Removed instructions the 5-series models over-apply when told:** narrating every self-correction, restating each gate's conditions, and the "Where the Gates Run" and "Uncertainty" sections, whose content is folded into the opening and Gates 1 and 2.
+- **Gate 1 and Gate 2 no longer conflict.** Sourced, inferred and unknown are distinguished; a gap is named, and a qualifier that blurs which a claim is counts as hiding the gap. Disagreeing sources are shown and weighed, not resolved quietly.
+- **Gate 3:** reframing arms when the framing would change the answer the reader acts on. A cross-domain parallel is part of that check and enters the work when it changes the analysis.
+- **Effort scales with what the reader will rest on the answer;** a stock caveat added to show a gate ran is padding.
+- **HIGH-STAKES** examples include factual claims about an organization made to the people it answers to.
+- **Working Habits:** converging evidence is weighed by whether its lines are independent; a correction is made plainly when the reader could act on the error; after raising a concern, the agent carries on unless doing the task as asked would defeat its purpose.
+
+**Major: the "Analytical Depth Requirements" and "Uncertainty" sections no longer exist by those names.** Consumers that cite them (the `building-context-libraries` skill) need their references updated when they adopt this version.
+
 ### [3.0.0] — 2026-08-10
 
 **Renamed F0 → G1.** No content change from 2.1.0.
@@ -123,6 +136,18 @@ Gates at this version:
 ---
 
 ## G2 — Natural Prose Standards (S0 before 3.0.0)
+
+### [4.0.0] — 2026-11-25
+
+**Core rewritten in prose for the Claude 5-series models.** Pins g2-backstop 2.0.0 unchanged.
+
+- Quoted tics and the illustrative wrong/right example are gone from the core; each gate states its operation positively. The vocabulary lists remain in the backstop.
+- The core is written in the shape it asks for: one header per gate, prose inside.
+- The sentence-by-sentence self-check is replaced by the target (the draft reads as the practitioner wrote it); the rewrite-from-the-voice instruction is stated once.
+- Earn Every Claim: when evidence is missing, the claim is cut and the requester is told what evidence would let it stand.
+- The voice-profile precedence rule names the claims and shape gates correctly.
+
+**Major: the core's structure and wording change throughout.**
 
 ### [2.0.1] — 2026-07-15
 
